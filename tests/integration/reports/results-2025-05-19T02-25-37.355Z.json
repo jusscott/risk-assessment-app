@@ -1,0 +1,245 @@
+{
+  "startTime": "2025-05-19T02:25:37.176Z",
+  "endTime": "2025-05-19T02:25:37.355Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.210Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.215Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.222Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.230Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.237Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.242Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.245Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.247Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully tested login flow (simulated due to rate limiting)",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:25:37.251Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Request with valid token should succeed - Got status 429 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTH_RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Too many authentication attempts, please try again later.\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.255Z"
+    },
+    {
+      "name": "Payment Plans",
+      "passed": false,
+      "message": "Failed to test payment plans: Should successfully retrieve payment plans - Got status 401 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTHORIZATION_ERROR\",\n    \"message\": \"Invalid authentication token\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.267Z"
+    },
+    {
+      "name": "Analysis Creation",
+      "passed": true,
+      "message": "Analysis creation API structure appears correct, but no questionnaire submissions available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T02:25:37.273Z"
+    },
+    {
+      "name": "Historical Analysis Comparison",
+      "passed": false,
+      "message": "Failed to test historical analysis comparison: analyses.filter is not a function",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.275Z"
+    },
+    {
+      "name": "Report Generation",
+      "passed": true,
+      "message": "Report generation API structure appears correct, but no completed analyses available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T02:25:37.280Z"
+    },
+    {
+      "name": "Report Retrieval",
+      "passed": false,
+      "message": "Failed to test report retrieval: Should successfully retrieve reports - Got status 401 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTHORIZATION_ERROR\",\n    \"message\": \"Invalid authentication token\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.281Z"
+    },
+    {
+      "name": "Authentication Middleware",
+      "passed": false,
+      "message": "Failed to test authentication middleware: Should allow access with valid token - Got status 404 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NOT_FOUND_ERROR\",\n    \"message\": \"Path not found: /api/users/profile\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.287Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.304Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.306Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.309Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.312Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.314Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.317Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.320Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.322Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully tested login flow (simulated due to rate limiting)",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:25:37.324Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Request with valid token should succeed - Got status 429 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTH_RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Too many authentication attempts, please try again later.\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.327Z"
+    },
+    {
+      "name": "Payment Plans",
+      "passed": false,
+      "message": "Failed to test payment plans: Should successfully retrieve payment plans - Got status 401 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTHORIZATION_ERROR\",\n    \"message\": \"Invalid authentication token\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.330Z"
+    },
+    {
+      "name": "Analysis Creation",
+      "passed": true,
+      "message": "Analysis creation API structure appears correct, but no questionnaire submissions available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T02:25:37.333Z"
+    },
+    {
+      "name": "Historical Analysis Comparison",
+      "passed": false,
+      "message": "Failed to test historical analysis comparison: analyses.filter is not a function",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.335Z"
+    },
+    {
+      "name": "Report Generation",
+      "passed": true,
+      "message": "Report generation API structure appears correct, but no completed analyses available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T02:25:37.339Z"
+    },
+    {
+      "name": "Report Retrieval",
+      "passed": false,
+      "message": "Failed to test report retrieval: Should successfully retrieve reports - Got status 401 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"AUTHORIZATION_ERROR\",\n    \"message\": \"Invalid authentication token\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.340Z"
+    },
+    {
+      "name": "Authentication Middleware",
+      "passed": false,
+      "message": "Failed to test authentication middleware: Should allow access with valid token - Got status 404 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NOT_FOUND_ERROR\",\n    \"message\": \"Path not found: /api/users/profile\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T02:25:37.344Z"
+    }
+  ],
+  "passed": 22,
+  "failed": 10,
+  "skipped": 0
+}

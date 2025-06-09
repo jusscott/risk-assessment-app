@@ -1,0 +1,139 @@
+{
+  "startTime": "2025-05-19T02:28:50.123Z",
+  "endTime": "2025-05-19T02:29:21.440Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.161Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.167Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.179Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.188Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.202Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.214Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.219Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:28:50.222Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: User login should succeed - Got status 502 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SERVICE_ERROR\",\n    \"message\": \"Authentication service is currently unavailable. Please try again in a few moments.\",\n    \"service\": \"auth-service\"\n  }\n}",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:28:51.285Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.923Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.928Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.934Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.937Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.941Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.946Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.949Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:29:05.951Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: User login should succeed - Got status 502 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SERVICE_ERROR\",\n    \"message\": \"Authentication service is currently unavailable. Please try again in a few moments.\",\n    \"service\": \"auth-service\"\n  }\n}",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:29:07.021Z"
+    }
+  ],
+  "passed": 16,
+  "failed": 2,
+  "skipped": 0
+}

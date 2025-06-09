@@ -1,0 +1,139 @@
+{
+  "startTime": "2025-05-19T20:27:56.926Z",
+  "endTime": "2025-05-19T20:27:58.653Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:56.965Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:56.973Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:56.984Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:56.992Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.001Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.008Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.014Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.017Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: Login response should include JWT token - Field: token",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:27:57.265Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.919Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.927Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.931Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.935Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.942Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.945Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.948Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T20:27:57.950Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: Login response should include JWT token - Field: token",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:27:58.033Z"
+    }
+  ],
+  "passed": 16,
+  "failed": 2,
+  "skipped": 0
+}

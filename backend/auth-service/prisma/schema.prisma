@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(uuid())
+  email             String         @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  role              Role           @default(USER)
+  organizationId    String?
+  organization      Organization?  @relation(fields: [organizationId], references: [id])
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  refreshTokens     RefreshToken[]
+  passwordResetToken PasswordResetToken?
+}
+
+model Organization {
+  id                String    @id @default(uuid())
+  name              String
+  industry          String?
+  size              OrgSize?
+  users             User[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum OrgSize {
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}

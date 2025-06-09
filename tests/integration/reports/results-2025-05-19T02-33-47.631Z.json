@@ -1,0 +1,139 @@
+{
+  "startTime": "2025-05-19T02:33:47.464Z",
+  "endTime": "2025-05-19T02:33:47.631Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.495Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.501Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.511Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.516Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.522Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.530Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.535Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.537Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: Rate limiting encountered: {\"success\":false,\"error\":{\"code\":\"AUTH_RATE_LIMIT_EXCEEDED\",\"message\":\"Too many authentication attempts, please try again later.\"}}",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:33:47.541Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.583Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.586Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.589Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.594Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.597Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.600Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.603Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:33:47.605Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: Rate limiting encountered: {\"success\":false,\"error\":{\"code\":\"AUTH_RATE_LIMIT_EXCEEDED\",\"message\":\"Too many authentication attempts, please try again later.\"}}",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:33:47.606Z"
+    }
+  ],
+  "passed": 16,
+  "failed": 2,
+  "skipped": 0
+}

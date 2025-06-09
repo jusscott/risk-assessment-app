@@ -1,0 +1,18 @@
+{
+  "startTime": "2025-05-19T17:53:44.715Z",
+  "endTime": "2025-05-19T17:55:08.767Z",
+  "tests": [
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: User login should succeed - Got status 502 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SERVICE_ERROR\",\n    \"message\": \"Authentication service is currently unavailable. Please try again in a few moments.\",\n    \"service\": \"auth-service\"\n  }\n}",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T17:55:08.767Z"
+    }
+  ],
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0
+}

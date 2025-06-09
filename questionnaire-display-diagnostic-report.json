@@ -1,0 +1,128 @@
+{
+  "timestamp": "2025-06-04T21:21:49.253Z",
+  "issues": [
+    {
+      "type": "SERVICE_HEALTH",
+      "severity": "HIGH",
+      "description": "API Gateway is not responding",
+      "location": "http://localhost:3000/health",
+      "error": "Request failed with status code 404",
+      "fix": "Check api-gateway container status and logs"
+    },
+    {
+      "type": "SERVICE_HEALTH",
+      "severity": "HIGH",
+      "description": "Auth Service is not responding",
+      "location": "http://localhost:3001/health",
+      "error": "",
+      "fix": "Check auth-service container status and logs"
+    },
+    {
+      "type": "SERVICE_HEALTH",
+      "severity": "HIGH",
+      "description": "Questionnaire Service is not responding",
+      "location": "http://localhost:3002/health",
+      "error": "",
+      "fix": "Check questionnaire-service container status and logs"
+    },
+    {
+      "type": "DOCKER_SERVICE_NAMES",
+      "severity": "HIGH",
+      "description": "Environment files use localhost instead of Docker service names",
+      "details": [
+        {
+          "file": "backend/questionnaire-service/.env",
+          "line": 2,
+          "content": "DATABASE_URL=\"postgresql://postgres:password@localhost:5433/questionnaires\"",
+          "issue": "Uses localhost instead of Docker service name"
+        },
+        {
+          "file": "backend/questionnaire-service/.env.development",
+          "line": 19,
+          "content": "ALLOWED_ORIGINS=\"http://localhost:3000,http://127.0.0.1:3000\"",
+          "issue": "Uses localhost instead of Docker service name"
+        },
+        {
+          "file": "backend/questionnaire-service/.env.development",
+          "line": 24,
+          "content": "API_GATEWAY_URL=\"http://localhost:5000\"",
+          "issue": "Uses localhost instead of Docker service name"
+        },
+        {
+          "file": "backend/api-gateway/.env",
+          "line": 22,
+          "content": "ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000",
+          "issue": "Uses localhost instead of Docker service name"
+        },
+        {
+          "file": "backend/auth-service/.env",
+          "line": 17,
+          "content": "ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5000",
+          "issue": "Uses localhost instead of Docker service name"
+        }
+      ],
+      "fix": "Replace localhost with proper Docker service names (auth-service, questionnaire-service, etc.)"
+    },
+    {
+      "type": "AUTH_ENDPOINT",
+      "severity": "HIGH",
+      "description": "Auth service validate-token endpoint not responding properly",
+      "location": "http://localhost:3001/api/auth/validate-token",
+      "error": ""
+    },
+    {
+      "type": "SERVICE_CONNECTIVITY",
+      "severity": "HIGH",
+      "description": "Questionnaire service cannot reach auth service for token validation",
+      "location": "questionnaire-service -> auth-service",
+      "error": "",
+      "fix": "Check service-to-service connectivity and Docker networking"
+    },
+    {
+      "type": "QUESTIONNAIRE_ENDPOINT",
+      "severity": "MEDIUM",
+      "description": "Questionnaire Templates endpoint error",
+      "location": "questionnaire-service/api/questionnaire/templates",
+      "error": ""
+    },
+    {
+      "type": "QUESTIONNAIRE_ENDPOINT",
+      "severity": "MEDIUM",
+      "description": "Questionnaire Submissions endpoint error",
+      "location": "questionnaire-service/api/questionnaire/submissions",
+      "error": ""
+    },
+    {
+      "type": "QUESTIONNAIRE_ENDPOINT",
+      "severity": "MEDIUM",
+      "description": "Questionnaire Diagnostic endpoint error",
+      "location": "questionnaire-service/api/diagnostic/health",
+      "error": ""
+    },
+    {
+      "type": "API_GATEWAY_PROXY",
+      "severity": "HIGH",
+      "description": "API Gateway not properly proxying Auth Routes",
+      "location": "api-gateway/api/auth/health",
+      "error": "Request failed with status code 404",
+      "fix": "Check API Gateway proxy configuration and service URLs"
+    },
+    {
+      "type": "API_GATEWAY_PROXY",
+      "severity": "HIGH",
+      "description": "API Gateway not properly proxying Questionnaire Routes",
+      "location": "api-gateway/api/questionnaire/templates",
+      "error": "Request failed with status code 404",
+      "fix": "Check API Gateway proxy configuration and service URLs"
+    },
+    {
+      "type": "DATABASE_CHECK",
+      "severity": "HIGH",
+      "description": "Unable to check database connectivity",
+      "error": "",
+      "fix": "Ensure questionnaire service diagnostic endpoints are available"
+    }
+  ],
+  "fixes": [],
+  "summary": ""
+}

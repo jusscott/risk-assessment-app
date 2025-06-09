@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  analysis-service:
+    build:
+      context: ./backend/analysis-service
+      dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/analysis-service:/app
+      - /app/node_modules  # Prevent local node_modules from overriding container ones
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('ws')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -1,0 +1,65 @@
+{
+  "startTime": "2025-05-19T02:13:31.681Z",
+  "endTime": "2025-05-19T02:13:31.767Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.726Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.731Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.736Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.742Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.750Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.756Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.763Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:13:31.766Z"
+    }
+  ],
+  "passed": 8,
+  "failed": 0,
+  "skipped": 0
+}

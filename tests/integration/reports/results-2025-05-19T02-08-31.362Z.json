@@ -1,0 +1,16 @@
+{
+  "startTime": "2025-05-19T02:08:30.261Z",
+  "endTime": "2025-05-19T02:08:31.362Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:08:30.295Z"
+    }
+  ],
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0
+}

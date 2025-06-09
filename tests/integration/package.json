@@ -1,0 +1,28 @@
+{
+  "name": "risk-assessment-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for Risk Assessment Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "node runner.js",
+    "test:auth": "node runner.js --suite=auth",
+    "test:questionnaire": "node runner.js --suite=questionnaire",
+    "test:payment": "node runner.js --suite=payment",
+    "test:analysis": "node runner.js --suite=analysis",
+    "test:report": "node runner.js --suite=report",
+    "test:api-gateway": "node runner.js --suite=api-gateway",
+    "test:health": "node runner.js --suite=health",
+    "test:service-interaction": "node runner.js --suite=service-interaction",
+    "test:user-journey": "node runner.js --suite=user-journey",
+    "test:complete": "node runner.js --suite=complete"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "chai": "^4.3.7",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "jest": "^29.7.0",
+    "minimist": "^1.2.8"
+  }
+}

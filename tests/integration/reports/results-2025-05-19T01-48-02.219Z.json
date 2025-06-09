@@ -1,0 +1,27 @@
+{
+  "startTime": "2025-05-19T01:47:01.725Z",
+  "endTime": "2025-05-19T01:48:02.219Z",
+  "tests": [
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: ",
+      "details": {
+        "user": "test-1747619282152@example.com"
+      },
+      "timestamp": "2025-05-19T01:48:02.155Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: ",
+      "details": {
+        "user": "test-1747619282198@example.com"
+      },
+      "timestamp": "2025-05-19T01:48:02.198Z"
+    }
+  ],
+  "passed": 0,
+  "failed": 2,
+  "skipped": 0
+}

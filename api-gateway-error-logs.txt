@@ -1,0 +1,50 @@
+api-gateway  |   code: 'MODULE_NOT_FOUND',
+api-gateway  |   requireStack: [
+api-gateway  |     '/app/src/controllers/health-check.controller.js',
+api-gateway  |     '/app/src/routes/health.routes.js',
+api-gateway  |     '/app/src/index.js'
+api-gateway  |   ]
+api-gateway  | }
+api-gateway  | 
+api-gateway  | > api-gateway@1.0.0 start
+api-gateway  | > node src/index.js
+api-gateway  | 
+api-gateway  | [32minfo[39m: Successfully loaded redis modules {"timestamp":"2025-05-28T01:11:54.955Z"}
+api-gateway  | [33mwarn[39m: Using memory store for rate limiting - either Redis is not connected or required modules are missing {"timestamp":"2025-05-28T01:11:54.961Z"}
+api-gateway  | [33mwarn[39m: Using memory store for rate limiting - either Redis is not connected or required modules are missing {"timestamp":"2025-05-28T01:11:54.961Z"}
+api-gateway  | [33mwarn[39m: Using memory store for rate limiting - either Redis is not connected or required modules are missing {"timestamp":"2025-05-28T01:11:54.962Z"}
+api-gateway  | [33mwarn[39m: Using memory store for rate limiting - either Redis is not connected or required modules are missing {"timestamp":"2025-05-28T01:11:54.962Z"}
+api-gateway  | [33mwarn[39m: Using memory store for rate limiting - either Redis is not connected or required modules are missing {"timestamp":"2025-05-28T01:11:54.962Z"}
+api-gateway  | [32minfo[39m: Successfully loaded Redis and express-redis-cache modules {"timestamp":"2025-05-28T01:11:54.964Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.965Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.966Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.966Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.966Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.966Z"}
+api-gateway  | [33mwarn[39m: Redis cache not available, returning no-op middleware {"timestamp":"2025-05-28T01:11:54.966Z"}
+api-gateway  | node:internal/modules/cjs/loader:1031
+api-gateway  |   throw err;
+api-gateway  |   ^
+api-gateway  | 
+api-gateway  | Error: Cannot find module 'axios'
+api-gateway  | Require stack:
+api-gateway  | - /app/src/controllers/health-check.controller.js
+api-gateway  | - /app/src/routes/health.routes.js
+api-gateway  | - /app/src/index.js
+api-gateway  |     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:1028:15)
+api-gateway  |     at Function.Module._load (node:internal/modules/cjs/loader:873:27)
+api-gateway  |     at Module.require (node:internal/modules/cjs/loader:1100:19)
+api-gateway  |     at require (node:internal/modules/cjs/helpers:119:18)
+api-gateway  |     at Object.<anonymous> (/app/src/controllers/health-check.controller.js:6:15)
+api-gateway  |     at Module._compile (node:internal/modules/cjs/loader:1198:14)
+api-gateway  |     at Object.Module._extensions..js (node:internal/modules/cjs/loader:1252:10)
+api-gateway  |     at Module.load (node:internal/modules/cjs/loader:1076:32)
+api-gateway  |     at Function.Module._load (node:internal/modules/cjs/loader:911:12)
+api-gateway  |     at Module.require (node:internal/modules/cjs/loader:1100:19) {
+api-gateway  |   code: 'MODULE_NOT_FOUND',
+api-gateway  |   requireStack: [
+api-gateway  |     '/app/src/controllers/health-check.controller.js',
+api-gateway  |     '/app/src/routes/health.routes.js',
+api-gateway  |     '/app/src/index.js'
+api-gateway  |   ]
+api-gateway  | }

@@ -1,0 +1,16 @@
+{
+  "name": "circuit-breaker-monitor",
+  "version": "1.0.0",
+  "description": "Automated monitoring system for circuit breaker pattern",
+  "main": "circuit-breaker-monitor.js",
+  "scripts": {
+    "start": "node circuit-breaker-monitor.js",
+    "start:dev": "NODE_ENV=development node circuit-breaker-monitor.js",
+    "start:prod": "NODE_ENV=production node circuit-breaker-monitor.js"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "node-schedule": "^2.1.0",
+    "winston": "^3.8.1"
+  }
+}

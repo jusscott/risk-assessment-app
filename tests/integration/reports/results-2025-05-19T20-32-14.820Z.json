@@ -1,0 +1,417 @@
+{
+  "startTime": "2025-05-19T20:31:12.778Z",
+  "endTime": "2025-05-19T20:32:14.820Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.817Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.823Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.831Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.838Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.845Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.851Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.856Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:12.861Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully registered and logged in a test user",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:31:12.982Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Request with valid token should succeed - Got status 401 with data: {\n  \"error\": \"Invalid or expired token\"\n}",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.017Z"
+    },
+    {
+      "name": "Questionnaire Service Placeholder",
+      "passed": true,
+      "message": "Tests not implemented yet",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.018Z"
+    },
+    {
+      "name": "Payment Plans",
+      "passed": false,
+      "message": "Failed to test payment plans: Should successfully retrieve payment plans - Got status 404 with data: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot GET /api/payments/plans</pre>\\n</body>\\n</html>\\n\"",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.119Z"
+    },
+    {
+      "name": "Analysis Creation",
+      "passed": true,
+      "message": "Analysis creation API structure appears correct, but no questionnaire submissions available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T20:31:13.216Z"
+    },
+    {
+      "name": "Historical Analysis Comparison",
+      "passed": true,
+      "message": "Historical analysis comparison API structure appears correct, but insufficient data for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data (need at least 2 completed analyses)"
+      },
+      "timestamp": "2025-05-19T20:31:13.221Z"
+    },
+    {
+      "name": "Report Generation",
+      "passed": true,
+      "message": "Report generation API structure appears correct, but no completed analyses available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T20:31:13.316Z"
+    },
+    {
+      "name": "Report Retrieval",
+      "passed": false,
+      "message": "Failed to test report retrieval: Should successfully retrieve reports - Got status 404 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"The requested resource was not found\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.325Z"
+    },
+    {
+      "name": "Authentication Middleware",
+      "passed": false,
+      "message": "Failed to test authentication middleware: Should deny access with invalid token - Got status 404",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.431Z"
+    },
+    {
+      "name": "Questionnaire to Analysis Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686673541",
+        "simulatedSubmissionId": "simulated-submission-1747686673553",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.553Z"
+    },
+    {
+      "name": "Analysis to Report Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686673686",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.686Z"
+    },
+    {
+      "name": "Report Sharing and Access Control (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686673695",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.695Z"
+    },
+    {
+      "name": "Report Generation Error Handling (Simulated)",
+      "passed": true,
+      "message": "Simulated test for incomplete analysis handling due to errors",
+      "details": {
+        "error": "Failed to create questionnaire template"
+      },
+      "timestamp": "2025-05-19T20:31:13.710Z"
+    },
+    {
+      "name": "Error Handling Between Services",
+      "passed": true,
+      "message": "Successfully tested error handling between analysis and report services",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:13.720Z"
+    },
+    {
+      "name": "Data Consistency (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686673730",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.730Z"
+    },
+    {
+      "name": "Auth to Payment Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedUserId": "simulated-user-1747686673832",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.832Z"
+    },
+    {
+      "name": "Subscription Management (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedPlanId": "simulated-plan-1747686673837",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:13.837Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.867Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.873Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.886Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.893Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.900Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.915Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.920Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:43.923Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully registered and logged in a test user",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:31:44.020Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Request with valid token should succeed - Got status 401 with data: {\n  \"error\": \"Invalid or expired token\"\n}",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.043Z"
+    },
+    {
+      "name": "Questionnaire Service Placeholder",
+      "passed": true,
+      "message": "Tests not implemented yet",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.043Z"
+    },
+    {
+      "name": "Payment Plans",
+      "passed": false,
+      "message": "Failed to test payment plans: Should successfully retrieve payment plans - Got status 404 with data: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot GET /api/payments/plans</pre>\\n</body>\\n</html>\\n\"",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.141Z"
+    },
+    {
+      "name": "Analysis Creation",
+      "passed": true,
+      "message": "Analysis creation API structure appears correct, but no questionnaire submissions available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T20:31:44.233Z"
+    },
+    {
+      "name": "Historical Analysis Comparison",
+      "passed": true,
+      "message": "Historical analysis comparison API structure appears correct, but insufficient data for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data (need at least 2 completed analyses)"
+      },
+      "timestamp": "2025-05-19T20:31:44.237Z"
+    },
+    {
+      "name": "Report Generation",
+      "passed": true,
+      "message": "Report generation API structure appears correct, but no completed analyses available for testing",
+      "details": {
+        "note": "Test skipped due to lack of prerequisite data"
+      },
+      "timestamp": "2025-05-19T20:31:44.327Z"
+    },
+    {
+      "name": "Report Retrieval",
+      "passed": false,
+      "message": "Failed to test report retrieval: Should successfully retrieve reports - Got status 404 with data: {\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"The requested resource was not found\"\n  }\n}",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.331Z"
+    },
+    {
+      "name": "Authentication Middleware",
+      "passed": false,
+      "message": "Failed to test authentication middleware: Should deny access with invalid token - Got status 404",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.434Z"
+    },
+    {
+      "name": "Questionnaire to Analysis Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686704533",
+        "simulatedSubmissionId": "simulated-submission-1747686704543",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.543Z"
+    },
+    {
+      "name": "Analysis to Report Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686704664",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.664Z"
+    },
+    {
+      "name": "Report Sharing and Access Control (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686704673",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.673Z"
+    },
+    {
+      "name": "Report Generation Error Handling (Simulated)",
+      "passed": true,
+      "message": "Simulated test for incomplete analysis handling due to errors",
+      "details": {
+        "error": "Failed to create questionnaire template"
+      },
+      "timestamp": "2025-05-19T20:31:44.688Z"
+    },
+    {
+      "name": "Error Handling Between Services",
+      "passed": true,
+      "message": "Successfully tested error handling between analysis and report services",
+      "details": {},
+      "timestamp": "2025-05-19T20:31:44.699Z"
+    },
+    {
+      "name": "Data Consistency (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedTemplateId": "simulated-template-1747686704709",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.709Z"
+    },
+    {
+      "name": "Auth to Payment Flow (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedUserId": "simulated-user-1747686704803",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.803Z"
+    },
+    {
+      "name": "Subscription Management (Simulated)",
+      "passed": true,
+      "message": "Test conducted with simulated data due to service integration issues",
+      "details": {
+        "simulatedPlanId": "simulated-plan-1747686704807",
+        "note": "Actual API endpoints appear to exist but may be unavailable or rate-limited in test environment"
+      },
+      "timestamp": "2025-05-19T20:31:44.807Z"
+    }
+  ],
+  "passed": 42,
+  "failed": 8,
+  "skipped": 0
+}

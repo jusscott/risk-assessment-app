@@ -1,0 +1,18 @@
+{
+  "startTime": "2025-05-19T17:55:21.168Z",
+  "endTime": "2025-05-19T17:57:21.243Z",
+  "tests": [
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: socket hang up",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T17:57:21.239Z"
+    }
+  ],
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0
+}

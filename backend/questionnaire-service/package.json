@@ -1,0 +1,40 @@
+{
+  "name": "questionnaire-service",
+  "version": "1.0.0",
+  "description": "Questionnaire Service for Security Risk Assessment Web Application",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "seed": "node prisma/seed.js",
+    "test": "jest",
+    "diagnose": "npm install && node scripts/diagnose-fix.js",
+    "fix-connectivity": "./scripts/fix-connectivity.sh",
+    "enhanced-fix": "node scripts/enhanced-connectivity-fix.js",
+    "restart-services": "./scripts/restart-services.sh",
+    "seed-frameworks": "node scripts/seed-frameworks.js",
+    "fix-templates": "node scripts/diagnose-and-fix-templates.js",
+    "fix-templates-ui": "./scripts/fix-template-issues.sh",
+    "fix-database": "node scripts/fix-database-connection.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.14.1",
+    "axios": "^1.4.0",
+    "axios-retry": "^3.3.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.2.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^2.6.9",
+    "opossum": "^6.4.0",
+    "prisma": "^4.14.1",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}

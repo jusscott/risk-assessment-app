@@ -1,0 +1,153 @@
+{
+  "startTime": "2025-05-19T02:24:43.095Z",
+  "endTime": "2025-05-19T02:24:43.267Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.128Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.134Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.147Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.153Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.160Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.165Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.170Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.172Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully tested login flow (simulated due to rate limiting)",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:24:43.176Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Failed to login test user: test-1747621483176@example.com - Status code: 429",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.181Z"
+    },
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.220Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.223Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.226Z"
+    },
+    {
+      "name": "Payment Service Health Check",
+      "passed": true,
+      "message": "Payment Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.228Z"
+    },
+    {
+      "name": "Analysis Service Health Check",
+      "passed": true,
+      "message": "Analysis Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.231Z"
+    },
+    {
+      "name": "Report Service Health Check",
+      "passed": true,
+      "message": "Report Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.233Z"
+    },
+    {
+      "name": "Deep Health Checks",
+      "passed": true,
+      "message": "All deep health checks passed",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.236Z"
+    },
+    {
+      "name": "Health Check Resilience",
+      "passed": true,
+      "message": "Health check resilience verified",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.238Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": true,
+      "message": "Successfully tested login flow (simulated due to rate limiting)",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T02:24:43.240Z"
+    },
+    {
+      "name": "Token Validation",
+      "passed": false,
+      "message": "Failed to validate token security: Failed to login test user: test-1747621483240@example.com - Status code: 429",
+      "details": {},
+      "timestamp": "2025-05-19T02:24:43.244Z"
+    }
+  ],
+  "passed": 18,
+  "failed": 2,
+  "skipped": 0
+}

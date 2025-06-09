@@ -1,0 +1,30 @@
+{
+  "startTime": "2025-05-19T02:12:23.977Z",
+  "endTime": "2025-05-19T02:12:24.079Z",
+  "tests": [
+    {
+      "name": "API Gateway Health Check",
+      "passed": true,
+      "message": "API Gateway is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:12:24.012Z"
+    },
+    {
+      "name": "Auth Service Health Check",
+      "passed": true,
+      "message": "Auth Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:12:24.017Z"
+    },
+    {
+      "name": "Questionnaire Service Health Check",
+      "passed": true,
+      "message": "Questionnaire Service is healthy",
+      "details": {},
+      "timestamp": "2025-05-19T02:12:24.024Z"
+    }
+  ],
+  "passed": 3,
+  "failed": 0,
+  "skipped": 0
+}

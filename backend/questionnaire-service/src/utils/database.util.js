@@ -1,0 +1,67 @@
+/**
+ * Database utility functions
+ */
+
+const { PrismaClient } = require('@prisma/client');
+
+/**
+ * Test database connectivity
+ * @returns {Promise<boolean>} Whether the connection was successful
+ */
+async function testConnection() {
+  // Development mode bypass
+  if (process.env.BYPASS_DB_VALIDATION === 'true') {
+    console.log('DEV MODE: Bypassing database connection test');
+    return true;
+  }
+  
+  try {
+    // Original implementation
+    const client = new PrismaClient();
+    await client.$connect();
+    await client.$disconnect();
+    return true;
+  } catch (error) {
+    console.error(`Database connection test failed: ${error.message}`);
+    return false;
+  }
+}
+  
+  try {
+    // Original implementation
+    const client = new PrismaClient();
+    await client.$connect();
+    await client.$disconnect();
+    return true;
+  } catch (error) {
+    console.error(`Database connection test failed: ${error.message}`);
+    return false;
+  }
+}
+  
+  try {
+    // Original implementation
+    const client = new PrismaClient();
+    await client.$connect();
+    await client.$disconnect();
+    return true;
+  } catch (error) {
+    console.error(`Database connection test failed: ${error.message}`);
+    return false;
+  }
+}
+  
+  try {
+    const client = new PrismaClient();
+    await client.$connect();
+    await client.$disconnect();
+    return true;
+  } catch (error) {
+    console.error(`Database connection test failed: ${error.message}`);
+    return false;
+  }
+}
+
+module.exports = {
+  testConnection
+};

@@ -1,0 +1,6 @@
+# Add to .dockerignore
+node_modules
+memory-bank
+*.log
+*.md
+test/

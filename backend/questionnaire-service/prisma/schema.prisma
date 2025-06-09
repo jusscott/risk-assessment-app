@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Answer {
+  id           Int        @id @default(autoincrement())
+  questionId   Int
+  submissionId Int
+  value        String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  Question     Question   @relation(fields: [questionId], references: [id])
+  Submission   Submission @relation(fields: [submissionId], references: [id])
+
+  @@index([questionId])
+  @@index([submissionId])
+}
+
+model Question {
+  id         Int      @id @default(autoincrement())
+  text       String
+  type       String
+  options    String[]
+  required   Boolean  @default(false)
+  order      Int
+  templateId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  Answer     Answer[]
+  Template   Template @relation(fields: [templateId], references: [id])
+}
+
+model Submission {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  templateId Int
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  Answer     Answer[]
+  Template   Template @relation(fields: [templateId], references: [id])
+}
+
+model Template {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  category    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  Question    Question[]
+  Submission  Submission[]
+}

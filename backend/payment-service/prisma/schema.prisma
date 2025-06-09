@@ -1,0 +1,246 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  userId        String   // Foreign key to user in Auth service
+  planId        Int
+  plan          Plan     @relation(fields: [planId], references: [id])
+  amount        Float
+  currency      String   @default("USD")
+  status        String   // "pending", "completed", "failed", "refunded"
+  paymentMethod String?  // e.g., "credit_card", "paypal", etc.
+  transactionId String?  // External payment processor transaction ID
+  metadata      Json?    // Additional payment metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+}
+
+model Plan {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  description        String?
+  price              Float
+  currency           String               @default("USD")
+  interval           String    // "monthly", "yearly", etc.
+  features           Json?     // Array of features included in this plan
+  isActive           Boolean   @default(true)
+  trialDays          Int       @default(0)
+  maxQuestionnaires  Int?
+  maxReports         Int?
+  stripeId           String?   // Stripe product ID
+  stripePriceId      String?   // Stripe price ID
+  usageBasedBilling  Boolean   @default(false)
+  usagePricePerUnit  Float?
+  usageType          String?   // e.g., "report_generation", "analysis", etc.
+  includedUsage      Int?      // Number of included usage units before additional charges
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  payments           Payment[]
+  subscriptions      Subscription[]
+  usageRecords       UsageRecord[]
+  enterprisePlans    EnterprisePlan[]
+}
+
+model Invoice {
+  id              Int           @id @default(autoincrement())
+  userId          String        // Foreign key to user in Auth service
+  amount          Float
+  currency        String        @default("USD")
+  status          String        // "draft", "sent", "paid", "void", "uncollectible"
+  dueDate         DateTime?
+  paidAt          DateTime?
+  items           Json          // Array of invoice items
+  metadata        Json?         // Additional invoice metadata
+  paymentIntentId String?       // Stripe payment intent ID
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  usageRecords    UsageRecord[]
+
+  @@index([userId])
+}
+
+model Subscription {
+  id                   Int           @id @default(autoincrement())
+  userId               String        // Foreign key to user in Auth service
+  planId               Int
+  plan                 Plan          @relation(fields: [planId], references: [id])
+  status               String        // "active", "past_due", "canceled", "incomplete", etc.
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAt             DateTime?
+  canceledAt           DateTime?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  isEnterprise         Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  usageRecords         UsageRecord[]
+
+  @@index([userId])
+}
+
+model UsageRecord {
+  id                    Int                  @id @default(autoincrement())
+  userId                String               // Foreign key to user in Auth service
+  subscriptionId        Int
+  subscription          Subscription         @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  planId                Int
+  plan                  Plan                 @relation(fields: [planId], references: [id])
+  quantity              Int
+  usageType             String
+  description           String?
+  timestamp             DateTime             @default(now())
+  billingPeriodStart    DateTime
+  billingPeriodEnd      DateTime
+  processed             Boolean              @default(false)
+  invoiceId             Int?
+  invoice               Invoice?             @relation(fields: [invoiceId], references: [id])
+  departmentId          Int?
+  department            Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  enterpriseSubscriptionId Int?
+  enterpriseSubscription EnterpriseSubscription? @relation(fields: [enterpriseSubscriptionId], references: [id], onDelete: SetNull)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([billingPeriodStart, billingPeriodEnd])
+  @@index([processed])
+  @@index([departmentId])
+  @@index([enterpriseSubscriptionId])
+}
+
+model Organization {
+  id             Int             @id @default(autoincrement())
+  name           String          @db.VarChar(255)
+  billingEmail   String          @db.VarChar(255)
+  billingAddress String?
+  taxId          String?         @db.VarChar(100)
+  status         String          @default("active") @db.VarChar(50)
+  departments    Department[]
+  enterprisePlans EnterprisePlan[]
+  enterpriseInvoices EnterpriseInvoice[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([status])
+}
+
+model Department {
+  id                   Int                   @id @default(autoincrement())
+  organizationId       Int
+  organization         Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name                 String                @db.VarChar(255)
+  costCenter           String?               @db.VarChar(100)
+  enterpriseSubscriptions EnterpriseSubscription[]
+  usageRecords         UsageRecord[]
+  enterpriseUsageSummaries EnterpriseUsageSummary[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([organizationId])
+}
+
+model EnterprisePlan {
+  id                   Int                    @id @default(autoincrement())
+  organizationId       Int
+  organization         Organization           @relation(fields: [organizationId], references: [id])
+  planId               Int
+  plan                 Plan                   @relation(fields: [planId], references: [id])
+  seats                Int
+  customPrice          Decimal?               @db.Decimal(10, 2)
+  volumeDiscount       Decimal?               @db.Decimal(5, 2)
+  billingCycle         String                 @default("monthly") @db.VarChar(50)
+  nextBillingDate      DateTime
+  status               String                 @default("active") @db.VarChar(50)
+  subscriptions        EnterpriseSubscription[]
+  usageQuotas          EnterpriseUsageQuota[]
+  usageSummaries       EnterpriseUsageSummary[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model EnterpriseSubscription {
+  id                Int            @id @default(autoincrement())
+  enterprisePlanId  Int
+  enterprisePlan    EnterprisePlan @relation(fields: [enterprisePlanId], references: [id])
+  userId            String         @db.VarChar(255)
+  departmentId      Int?
+  department        Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  usageRecords      UsageRecord[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([enterprisePlanId])
+  @@index([userId])
+  @@index([departmentId])
+}
+
+model EnterpriseUsageQuota {
+  id               Int            @id @default(autoincrement())
+  enterprisePlanId Int
+  enterprisePlan   EnterprisePlan @relation(fields: [enterprisePlanId], references: [id], onDelete: Cascade)
+  usageType        String         @db.VarChar(100)
+  pooled           Boolean        @default(true)
+  totalQuota       Int
+  perSeatQuota     Int?
+  unitPrice        Decimal?       @db.Decimal(10, 2)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([enterprisePlanId])
+}
+
+model EnterpriseUsageSummary {
+  id               Int            @id @default(autoincrement())
+  enterprisePlanId Int
+  enterprisePlan   EnterprisePlan @relation(fields: [enterprisePlanId], references: [id], onDelete: Cascade)
+  departmentId     Int?
+  department       Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  usageType        String         @db.VarChar(100)
+  periodStart      DateTime
+  periodEnd        DateTime
+  totalUsage       Int            @default(0)
+  processedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([enterprisePlanId])
+  @@index([departmentId])
+}
+
+model EnterpriseInvoice {
+  id                Int          @id @default(autoincrement())
+  organizationId    Int
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  amount            Decimal      @db.Decimal(10, 2)
+  currency          String       @default("USD") @db.VarChar(3)
+  status            String       @default("draft") @db.VarChar(50)
+  dueDate           DateTime?
+  paidAt            DateTime?
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
+  items             Json
+  metadata          Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}

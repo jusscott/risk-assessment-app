@@ -1,0 +1,41 @@
+{
+  "startTime": "2025-05-19T20:44:59.865Z",
+  "endTime": "2025-05-19T20:45:00.257Z",
+  "tests": [
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: ",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:45:00.175Z"
+    },
+    {
+      "name": "Questionnaire Service Placeholder",
+      "passed": true,
+      "message": "Tests not implemented yet",
+      "details": {},
+      "timestamp": "2025-05-19T20:45:00.177Z"
+    },
+    {
+      "name": "User Registration and Login",
+      "passed": false,
+      "message": "Failed to register or login a test user: ",
+      "details": {
+        "user": "test-user@example.com"
+      },
+      "timestamp": "2025-05-19T20:45:00.224Z"
+    },
+    {
+      "name": "Questionnaire Service Placeholder",
+      "passed": true,
+      "message": "Tests not implemented yet",
+      "details": {},
+      "timestamp": "2025-05-19T20:45:00.224Z"
+    }
+  ],
+  "passed": 2,
+  "failed": 2,
+  "skipped": 0
+}

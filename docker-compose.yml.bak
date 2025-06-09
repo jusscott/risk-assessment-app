@@ -1,0 +1,394 @@
+services:
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:5000
+    depends_on:
+      - api-gateway
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - frontend
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://0.0.0.0:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Redis (for caching and rate limiting)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/api-gateway:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - QUESTIONNAIRE_SERVICE_URL=http://questionnaire-service:5002/api
+      - PAYMENT_SERVICE_URL=http://payment-service:5003/api
+      - ANALYSIS_SERVICE_URL=http://analysis-service:5004/api
+      - REPORT_SERVICE_URL=http://report-service:5005/api
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=shared-security-risk-assessment-secret-key
+      - BYPASS_AUTH=true
+    depends_on:
+      - auth-service
+      - questionnaire-service
+      - payment-service
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - api-gateway
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/auth-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:password@auth-db:5432/auth
+      - PORT=5001
+      - JWT_SECRET=shared-security-risk-assessment-secret-key
+    depends_on:
+      - auth-db
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - auth-service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Questionnaire Service
+  questionnaire-service:
+    build:
+      context: ./backend/questionnaire-service
+      dockerfile: Dockerfile
+    container_name: questionnaire-service
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./backend/questionnaire-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@questionnaire-db:5432/questionnaires
+      - AUTH_SERVICE_URL=http://auth-service:5001/api
+      - PORT=5002
+      - BYPASS_AUTH=true
+    depends_on:
+      - questionnaire-db
+      - auth-service
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - questionnaire-service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5002/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Payment Service
+  payment-service:
+    build:
+      context: ./backend/payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./backend/payment-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:password@payment-db:5432/payments
+      - STRIPE_API_KEY=sk_test_example
+      - AUTH_SERVICE_URL=http://auth-service:5001/api
+      - PORT=5003
+    depends_on:
+      - payment-db
+      - auth-service
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - payment-service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5003/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Analysis Service
+  analysis-service:
+    build:
+      context: ./backend/analysis-service
+      dockerfile: Dockerfile
+    container_name: analysis-service
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./backend/analysis-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:password@analysis-db:5432/analysis
+      - AUTH_SERVICE_URL=http://auth-service:5001/api
+      - QUESTIONNAIRE_SERVICE_URL=http://questionnaire-service:5002/api
+      - PORT=5004
+    depends_on:
+      - analysis-db
+      - auth-service
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - analysis-service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Report Service
+  report-service:
+    build:
+      context: ./backend/report-service
+      dockerfile: Dockerfile
+    container_name: report-service
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./backend/report-service:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:password@report-db:5432/reports
+      - AUTH_SERVICE_URL=http://auth-service:5001/api
+      - ANALYSIS_SERVICE_URL=http://analysis-service:5004/api
+      - PORT=5005
+      - JWT_SECRET=shared-security-risk-assessment-secret-key
+    depends_on:
+      - report-db
+      - auth-service
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - report-service
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Databases
+  auth-db:
+    image: postgres:14
+    container_name: auth-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=auth
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      app-network:
+        aliases:
+          - auth-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  questionnaire-db:
+    image: postgres:14
+    container_name: questionnaire-db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=questionnaires
+    volumes:
+      - questionnaire-data:/var/lib/postgresql/data
+    networks:
+      app-network:
+        aliases:
+          - questionnaire-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-db:
+    image: postgres:14
+    container_name: payment-db
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=payments
+    volumes:
+      - payment-data:/var/lib/postgresql/data
+    networks:
+      app-network:
+        aliases:
+          - payment-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analysis-db:
+    image: postgres:14
+    container_name: analysis-db
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=analysis
+    volumes:
+      - analysis-data:/var/lib/postgresql/data
+    networks:
+      app-network:
+        aliases:
+          - analysis-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  report-db:
+    image: postgres:14
+    container_name: report-db
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=reports
+    volumes:
+      - report-data:/var/lib/postgresql/data
+    networks:
+      app-network:
+        aliases:
+          - report-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  # Circuit Breaker Monitor
+  circuit-breaker-monitor:
+    build:
+      context: ./backend/scripts/circuit-breaker
+      dockerfile: Dockerfile
+    container_name: circuit-breaker-monitor
+    volumes:
+      - ./backend/scripts/circuit-breaker:/app
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - API_GATEWAY_URL=http://api-gateway:5000
+      - CIRCUIT_CHECK_INTERVAL_MINUTES=1
+      - CIRCUIT_ALERT_THRESHOLD=2
+      - CIRCUIT_AUTO_RECOVERY=true
+      - CIRCUIT_RECOVERY_ATTEMPT_AFTER=5
+      - CIRCUIT_RECOVERY_MAX_ATTEMPTS=3
+      - CIRCUIT_RECOVERY_COOLDOWN_MINUTES=30
+      - EMAIL_NOTIFICATIONS=false
+      - SLACK_NOTIFICATIONS=false
+    depends_on:
+      - api-gateway
+    restart: always
+    networks:
+      app-network:
+        aliases:
+          - circuit-breaker-monitor
+
+volumes:
+  auth-data:
+  questionnaire-data:
+  payment-data:
+  analysis-data:
+  report-data:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

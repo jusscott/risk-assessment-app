@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Analysis {
+  id             Int      @id @default(autoincrement())
+  userId         String   // Foreign key to user in Auth service
+  submissionId   Int      // Reference to the submission in Questionnaire service
+  riskScore      Float
+  securityLevel  String
+  industryId     Int?     // Optional reference to industry for benchmarking
+  industry       Industry? @relation(fields: [industryId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  recommendations Recommendation[]
+  areaScores     AreaScore[]
+  benchmarkComparisons BenchmarkComparison[]
+  ruleResults    RuleResult[]
+}
+
+model Recommendation {
+  id            Int      @id @default(autoincrement())
+  analysisId    Int
+  analysis      Analysis @relation(fields: [analysisId], references: [id])
+  description   String
+  priority      Int      // 1-5, with 1 being highest priority
+  category      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([analysisId])
+}
+
+model AreaScore {
+  id         Int      @id @default(autoincrement())
+  analysisId Int
+  analysis   Analysis @relation(fields: [analysisId], references: [id])
+  area       String
+  score      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([analysisId])
+}
+
+model RiskCategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// New models for industry benchmarking
+
+model Industry {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  analyses     Analysis[]
+  benchmarks   IndustryBenchmark[]
+}
+
+model IndustryBenchmark {
+  id           Int      @id @default(autoincrement())
+  industryId   Int
+  industry     Industry @relation(fields: [industryId], references: [id])
+  frameworkId  String   // Reference to compliance framework (ISO, SOC2, etc.)
+  area         String   // Security area (Access Control, Data Protection, etc.)
+  averageScore Float    // Average score for this area in this industry
+  medianScore  Float    // Median score for this area in this industry
+  sampleSize   Int      // Number of assessments used to calculate benchmark
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  comparisons  BenchmarkComparison[]
+
+  @@unique([industryId, frameworkId, area])
+  @@index([industryId])
+}
+
+model BenchmarkComparison {
+  id            Int              @id @default(autoincrement())
+  analysisId    Int
+  analysis      Analysis         @relation(fields: [analysisId], references: [id])
+  benchmarkId   Int
+  benchmark     IndustryBenchmark @relation(fields: [benchmarkId], references: [id])
+  area          String
+  score         Float            // User's score
+  benchmarkScore Float           // Industry benchmark score
+  percentile    Float?           // Optional percentile ranking (0-100)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([analysisId])
+  @@index([benchmarkId])
+}
+
+// Custom rules for analysis
+model CustomRule {
+  id          Int         @id @default(autoincrement())
+  userId      String      // Foreign key to user in Auth service
+  name        String
+  description String?
+  criteria    Json        // JSON structure defining rule conditions
+  severity    Int         // 1-5 scale, with 5 being most severe
+  category    String      // Security category this rule applies to
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  ruleResults RuleResult[]
+
+  @@index([userId])
+}
+
+// Results of rule evaluation on analyses
+model RuleResult {
+  id         Int        @id @default(autoincrement())
+  analysisId Int
+  analysis   Analysis   @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  ruleId     Int
+  rule       CustomRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  matched    Boolean    // Whether the rule conditions were met
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([analysisId])
+  @@index([ruleId])
+}

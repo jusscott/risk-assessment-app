@@ -198,22 +198,35 @@ const QuestionnaireDetail: React.FC = () => {
             const response = await questionnaireWrapper.getSubmissionById(parseInt(id));
             setSubmission(response.data);
             
-            // If the submission has a template, set it
-            if (response.data.template) {
-              setTemplate(response.data.template);
+            // If the submission has a template, set it (handle both uppercase and lowercase)
+            // Use type assertion to handle Prisma's uppercase naming vs interface lowercase naming
+            const submissionData = response.data as any;
+            let currentTemplate = null;
+            
+            if (submissionData.Template) {
+              // Transform the data structure to match frontend expectations
+              currentTemplate = {
+                ...submissionData.Template,
+                questions: submissionData.Template.Question || submissionData.Template.questions || []
+              };
+              setTemplate(currentTemplate);
+            } else if (submissionData.template) {
+              currentTemplate = submissionData.template;
+              setTemplate(currentTemplate);
             }
             
-            // Initialize answers from existing submission data
-            if (response.data.answers && response.data.answers.length > 0) {
+            // Initialize answers from existing submission data (handle both uppercase and lowercase)
+            const answersData = submissionData.Answer || submissionData.answers || [];
+            if (answersData && answersData.length > 0) {
               const answerMap: { [key: number]: string } = {};
-              response.data.answers.forEach((answer: Answer) => {
+              answersData.forEach((answer: Answer) => {
                 answerMap[answer.questionId] = answer.value;
               });
               setAnswers(answerMap);
               
-              // Calculate the starting step based on answered questions
-              if (response.data.template && response.data.template.questions) {
-                const sortedQuestions = [...response.data.template.questions].sort((a, b) => a.order - b.order);
+              // Calculate the starting step based on answered questions using the current template
+              if (currentTemplate && currentTemplate.questions) {
+                const sortedQuestions = [...currentTemplate.questions].sort((a, b) => a.order - b.order);
                 const answeredCount = Object.keys(answerMap).length;
                 const totalCount = sortedQuestions.length;
                 

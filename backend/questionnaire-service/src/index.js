@@ -181,19 +181,7 @@ logger.info('- GET /diagnostic/full-diagnostic - Full diagnostic report');
 app.use(errorHandler);
 
 // Start the server
-const server = 
-// Health check endpoint
-app.use('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    status: 'healthy',
-    service: 'questionnaire-service',
-    timestamp: new Date().toISOString(),
-    version: process.env.SERVICE_VERSION || '1.0.0'
-  });
-});
-
-app.listen(port, () => {
+const server = app.listen(port, () => {
   logger.info(`Questionnaire service listening on port ${port}`);
 });
 

@@ -1,10 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const axios = require('axios');
 const config = require('../config/config');
-const enhancedClient = require('../utils/enhanced-client');
-
-// Use the enhanced client instance directly for analysis service communications
-const analysisClient = enhancedClient;
 
 const prisma = new PrismaClient();
 
@@ -53,10 +49,10 @@ const getInProgressSubmissions = async (req, res) => {
     // First check if any submissions exist for this user at all - using more flexible matching
     console.log(`Searching for submissions where userId = "${userId}"`);
     
-    // Try to find submissions for this user with enhanced user ID matching
+    // Try to find submissions for this user with more detailed logging
     const allUserSubmissions = await prisma.submission.findMany({
       where: {
-        userId: String(userId)
+        userId: String(userId) // Ensure userId is treated as a string for consistent comparison
       },
       select: {
         id: true,
@@ -86,10 +82,10 @@ const getInProgressSubmissions = async (req, res) => {
       );
     }
     
-    // Find in-progress (draft) submissions with enhanced user ID matching
+    // Find in-progress (draft) submissions - include userId in logging
     const submissions = await prisma.submission.findMany({
       where: { 
-        userId: String(userId),
+        userId: String(userId), // Ensure userId is treated as a string for consistent comparison
         status: 'draft'
       },
       include: {
@@ -256,10 +252,10 @@ const getCompletedSubmissions = async (req, res) => {
       });
     }
     
-    // Find completed submissions with enhanced user ID matching
+    // Find completed submissions (status: submitted or analyzed)
     const submissions = await prisma.submission.findMany({
       where: { 
-        userId: String(userId),
+        userId: userId,
         status: { in: ['submitted', 'analyzed'] }
       },
       include: {
@@ -285,12 +281,10 @@ const getCompletedSubmissions = async (req, res) => {
       // Try to get real score from analysis service if available
       let score = null;
       try {
-        const analysisResponse = await analysisClient.request({
-          service: 'analysis',
-          method: 'GET',
-          url: `/results/${submission.id}`,
-          timeout: 3000 // Short timeout to prevent long waits
-        });
+        const analysisResponse = await axios.get(
+          `${config.analysisService.url}/results/${submission.id}`,
+          { timeout: 3000 } // Short timeout to prevent long waits
+        );
         if (analysisResponse.data && analysisResponse.data.success) {
           score = analysisResponse.data.data.score;
         }
@@ -338,8 +332,6 @@ const getSubmissionById = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // Completely fixed query - removed both direct 'questions' include on Submission model
-    // and any nested incorrect inclusion patterns
     const submission = await prisma.submission.findUnique({
       where: { id: parseInt(id) },
       include: {
@@ -366,10 +358,8 @@ const getSubmissionById = async (req, res) => {
       });
     }
 
-    // Check if user owns this submission with flexible user ID matching
-    const userOwnsSubmission = (submission.userId === String(userId));
-    
-    if (!userOwnsSubmission && req.user.role !== 'ADMIN') {
+    // Check if user owns this submission
+    if (submission.userId !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         error: {
@@ -379,23 +369,9 @@ const getSubmissionById = async (req, res) => {
       });
     }
 
-    // Format the response to match frontend expectations
-    const formattedSubmission = {
-      ...submission,
-      template: {
-        ...submission.Template,
-        questions: submission.Template.Question || []
-      }
-    };
-    
-    // Remove the original Template field to avoid confusion
-    delete formattedSubmission.Template;
-
-    console.log(`Formatted submission ${submission.id} with ${formattedSubmission.template.Question.length} questions`);
-
     res.status(200).json({
       success: true,
-      data: formattedSubmission,
+      data: submission,
       message: 'Submission retrieved successfully'
     });
   } catch (error) {
@@ -434,10 +410,10 @@ const startSubmission = async (req, res) => {
       });
     }
 
-    // Check if user already has an in-progress submission for this template with enhanced user ID matching
+    // Check if user already has an in-progress submission for this template
     const existingSubmission = await prisma.submission.findFirst({
       where: {
-        userId: String(userId),
+        userId: userId,
         templateId: parseInt(templateId),
         status: 'draft'
       }
@@ -454,14 +430,12 @@ const startSubmission = async (req, res) => {
     // Create a new submission
     const submission = await prisma.submission.create({
       data: {
-        userId: String(userId),
-        status: 'draft',
-        updatedAt: new Date(),
+        userId: userId,
         Template: {
-          connect: {
-            id: parseInt(templateId)
-          }
-        }
+          connect: { id: parseInt(templateId) }
+        },
+        status: 'draft',
+        updatedAt: new Date()
       }
     });
 
@@ -507,10 +481,7 @@ const updateSubmission = async (req, res) => {
       });
     }
 
-    // Check if user owns this submission with flexible user ID matching
-    const userOwnsSubmission = (submission.userId === String(userId));
-    
-    if (!userOwnsSubmission) {
+    if (submission.userId !== userId) {
       return res.status(403).json({
         success: false,
         error: {
@@ -530,8 +501,42 @@ const updateSubmission = async (req, res) => {
       });
     }
 
+    // Convert answers to array format if needed
+    let answersArray = [];
+    if (Array.isArray(answers)) {
+      // Already an array, use as is
+      answersArray = answers;
+    } else if (typeof answers === 'object' && answers !== null) {
+      // Handle both numeric keys ("1", "2") and question keys ("q1", "q2")
+      answersArray = Object.entries(answers).map(([questionKey, value]) => {
+        let questionId;
+        
+        // If key starts with 'q', extract the number (e.g., "q1" -> 1)
+        if (typeof questionKey === 'string' && questionKey.startsWith('q')) {
+          const numericPart = questionKey.substring(1);
+          questionId = parseInt(numericPart);
+        } else {
+          // Direct numeric conversion for keys like "1", "2"
+          questionId = parseInt(questionKey);
+        }
+        
+        // Validate that we got a valid number
+        if (isNaN(questionId)) {
+          console.error(`Invalid question key: ${questionKey} - could not convert to numeric ID`);
+          throw new Error(`Invalid question identifier: ${questionKey}`);
+        }
+        
+        return {
+          questionId: questionId,
+          value: value
+        };
+      });
+    } else {
+      throw new Error('Invalid answers format');
+    }
+
     // Upsert each answer
-    const answerPromises = answers.map(answer => {
+    const answerPromises = answersArray.map(answer => {
       return prisma.answer.upsert({
         where: {
           id: answer.id || 0, // If id is provided, use it, otherwise use 0 which won't match
@@ -542,7 +547,9 @@ const updateSubmission = async (req, res) => {
         create: {
           submissionId: parseInt(id),
           questionId: answer.questionId,
-          value: answer.value
+          value: answer.value,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       });
     });
@@ -609,10 +616,7 @@ const submitQuestionnaire = async (req, res) => {
       });
     }
 
-    // Check if user owns this submission with flexible user ID matching
-    const userOwnsSubmission = (submission.userId === String(userId));
-    
-    if (!userOwnsSubmission) {
+    if (submission.userId !== userId) {
       return res.status(403).json({
         success: false,
         error: {
@@ -668,19 +672,19 @@ const submitQuestionnaire = async (req, res) => {
     // Notify the analysis service about the completed questionnaire
     try {
       console.log(`Notifying analysis service about completed questionnaire ${submission.id}`);
-      const response = await analysisClient.request({
-        service: 'analysis',
-        method: 'POST',
-        url: `/api/webhooks/questionnaire-completed`,
-        data: {
+      const response = await axios.post(
+        `${config.analysisService.url}/api/webhooks/questionnaire-completed`, 
+        {
           submissionId: submission.id,
           userId: userId
         },
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 5000 // 5 second timeout
-      });
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 5000 // 5 second timeout
+        }
+      );
       
       if (response.status === 202 || response.status === 200) {
         console.log(`Successfully notified analysis service about questionnaire ${submission.id}`);

@@ -465,13 +465,34 @@ const updateSubmission = async (req, res) => {
   const { answers } = req.body;
   const userId = req.user.id;
 
+  console.log(`[updateSubmission] Starting PUT request for submission ${id}`);
+  console.log(`[updateSubmission] User ID: ${userId}`);
+  console.log(`[updateSubmission] Answers received:`, JSON.stringify(answers, null, 2));
+
   try {
+    // Validate submission ID parameter
+    const submissionId = parseInt(id);
+    if (isNaN(submissionId) || submissionId <= 0) {
+      console.log(`[updateSubmission] Invalid submission ID: ${id}`);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_SUBMISSION_ID',
+          message: 'Invalid submission ID provided'
+        }
+      });
+    }
+
+    console.log(`[updateSubmission] Validated submission ID: ${submissionId}`);
+
     // Check if submission exists and belongs to user
+    console.log(`[updateSubmission] Checking if submission ${submissionId} exists...`);
     const submission = await prisma.submission.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: submissionId }
     });
 
     if (!submission) {
+      console.log(`[updateSubmission] Submission ${submissionId} not found`);
       return res.status(404).json({
         success: false,
         error: {
@@ -481,7 +502,15 @@ const updateSubmission = async (req, res) => {
       });
     }
 
+    console.log(`[updateSubmission] Found submission:`, {
+      id: submission.id,
+      userId: submission.userId,
+      status: submission.status,
+      templateId: submission.templateId
+    });
+
     if (submission.userId !== userId) {
+      console.log(`[updateSubmission] Permission denied: submission belongs to ${submission.userId}, user is ${userId}`);
       return res.status(403).json({
         success: false,
         error: {
@@ -492,6 +521,7 @@ const updateSubmission = async (req, res) => {
     }
 
     if (submission.status !== 'draft') {
+      console.log(`[updateSubmission] Invalid status: ${submission.status} (expected 'draft')`);
       return res.status(400).json({
         success: false,
         error: {
@@ -501,82 +531,194 @@ const updateSubmission = async (req, res) => {
       });
     }
 
-    // Convert answers to array format if needed
-    let answersArray = [];
-    if (Array.isArray(answers)) {
-      // Already an array, use as is
-      answersArray = answers;
-    } else if (typeof answers === 'object' && answers !== null) {
-      // Handle both numeric keys ("1", "2") and question keys ("q1", "q2")
-      answersArray = Object.entries(answers).map(([questionKey, value]) => {
-        let questionId;
-        
-        // If key starts with 'q', extract the number (e.g., "q1" -> 1)
-        if (typeof questionKey === 'string' && questionKey.startsWith('q')) {
-          const numericPart = questionKey.substring(1);
-          questionId = parseInt(numericPart);
-        } else {
-          // Direct numeric conversion for keys like "1", "2"
-          questionId = parseInt(questionKey);
+    // Validate answers input
+    if (!answers) {
+      console.log(`[updateSubmission] No answers provided`);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_ANSWERS',
+          message: 'Answers are required'
         }
-        
-        // Validate that we got a valid number
-        if (isNaN(questionId)) {
-          console.error(`Invalid question key: ${questionKey} - could not convert to numeric ID`);
-          throw new Error(`Invalid question identifier: ${questionKey}`);
-        }
-        
-        return {
-          questionId: questionId,
-          value: value
-        };
       });
-    } else {
-      throw new Error('Invalid answers format');
     }
 
-    // Upsert each answer
-    const answerPromises = answersArray.map(answer => {
-      return prisma.answer.upsert({
-        where: {
-          id: answer.id || 0, // If id is provided, use it, otherwise use 0 which won't match
-        },
-        update: {
-          value: answer.value
-        },
-        create: {
-          submissionId: parseInt(id),
-          questionId: answer.questionId,
-          value: answer.value,
-          createdAt: new Date(),
-          updatedAt: new Date()
+    // Convert answers to array format if needed
+    let answersArray = [];
+    console.log(`[updateSubmission] Processing answers...`);
+    
+    try {
+      if (Array.isArray(answers)) {
+        // Already an array, use as is
+        answersArray = answers;
+        console.log(`[updateSubmission] Answers already in array format, count: ${answersArray.length}`);
+      } else if (typeof answers === 'object' && answers !== null) {
+        // Handle both numeric keys ("1", "2") and question keys ("q1", "q2")
+        console.log(`[updateSubmission] Converting object answers to array...`);
+        
+        answersArray = Object.entries(answers).map(([questionKey, value]) => {
+          let questionId;
+          
+          // If key starts with 'q', extract the number (e.g., "q1" -> 1)
+          if (typeof questionKey === 'string' && questionKey.startsWith('q')) {
+            const numericPart = questionKey.substring(1);
+            questionId = parseInt(numericPart);
+          } else {
+            // Direct numeric conversion for keys like "1", "2"
+            questionId = parseInt(questionKey);
+          }
+          
+          // Validate that we got a valid number
+          if (isNaN(questionId)) {
+            console.error(`[updateSubmission] Invalid question key: ${questionKey} - could not convert to numeric ID`);
+            throw new Error(`Invalid question identifier: ${questionKey}`);
+          }
+          
+          // Handle both simple values and complex answer objects
+          let answerValue = value;
+          if (typeof value === 'object' && value !== null) {
+            // If value is an object, extract the answer field, or stringify if needed
+            if (value.answer !== undefined) {
+              answerValue = value.answer;
+            } else {
+              // If it's an object without an answer field, stringify it
+              answerValue = JSON.stringify(value);
+            }
+          }
+          
+          // Ensure answer value is a string
+          if (typeof answerValue !== 'string') {
+            answerValue = String(answerValue);
+          }
+          
+          console.log(`[updateSubmission] Processed answer: questionId=${questionId}, value="${answerValue}"`);
+          
+          return {
+            questionId: questionId,
+            value: answerValue
+          };
+        });
+        
+        console.log(`[updateSubmission] Converted to array format, count: ${answersArray.length}`);
+      } else {
+        console.log(`[updateSubmission] Invalid answers format: ${typeof answers}`);
+        throw new Error('Invalid answers format - must be array or object');
+      }
+    } catch (answerProcessingError) {
+      console.error(`[updateSubmission] Error processing answers:`, answerProcessingError);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_ANSWERS_FORMAT',
+          message: answerProcessingError.message
         }
       });
-    });
+    }
 
-    await Promise.all(answerPromises);
+    if (answersArray.length === 0) {
+      console.log(`[updateSubmission] No valid answers to process`);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_ANSWERS',
+          message: 'No valid answers provided'
+        }
+      });
+    }
+
+    // Process each answer individually with comprehensive error handling
+    console.log(`[updateSubmission] Processing ${answersArray.length} answers...`);
+    const processedAnswers = [];
+    
+    for (let i = 0; i < answersArray.length; i++) {
+      const answer = answersArray[i];
+      console.log(`[updateSubmission] Processing answer ${i + 1}/${answersArray.length}: questionId=${answer.questionId}`);
+      
+      try {
+        // Find existing answer for this submission and question
+        const existingAnswer = await prisma.answer.findFirst({
+          where: {
+            submissionId: submissionId,
+            questionId: answer.questionId
+          }
+        });
+
+        let result;
+        if (existingAnswer) {
+          console.log(`[updateSubmission] Updating existing answer with ID ${existingAnswer.id}`);
+          // Update existing answer
+          result = await prisma.answer.update({
+            where: { id: existingAnswer.id },
+            data: {
+              value: answer.value,
+              updatedAt: new Date()
+            }
+          });
+        } else {
+          console.log(`[updateSubmission] Creating new answer for question ${answer.questionId}`);
+          // Create new answer
+          result = await prisma.answer.create({
+            data: {
+              submissionId: submissionId,
+              questionId: answer.questionId,
+              value: answer.value,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          });
+        }
+        
+        processedAnswers.push(result);
+        console.log(`[updateSubmission] Successfully processed answer for question ${answer.questionId}`);
+        
+      } catch (answerError) {
+        console.error(`[updateSubmission] Error processing answer for question ${answer.questionId}:`, answerError);
+        return res.status(500).json({
+          success: false,
+          error: {
+            code: 'ANSWER_PROCESSING_ERROR',
+            message: `Failed to save answer for question ${answer.questionId}: ${answerError.message}`
+          }
+        });
+      }
+    }
+
+    console.log(`[updateSubmission] Successfully processed ${processedAnswers.length} answers`);
 
     // Update the submission's updatedAt timestamp
+    console.log(`[updateSubmission] Updating submission timestamp...`);
     await prisma.submission.update({
-      where: { id: parseInt(id) },
+      where: { id: submissionId },
       data: {
         updatedAt: new Date()
       }
     });
 
+    console.log(`[updateSubmission] Successfully completed PUT request for submission ${submissionId}`);
+    
     res.status(200).json({
       success: true,
-      message: 'Submission updated successfully'
-    });
-  } catch (error) {
-    console.error('Error updating submission:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'SERVER_ERROR',
-        message: 'An error occurred while updating the submission'
+      message: 'Submission updated successfully',
+      data: {
+        submissionId: submissionId,
+        answersProcessed: processedAnswers.length
       }
     });
+    
+  } catch (error) {
+    console.error(`[updateSubmission] CRITICAL ERROR:`, error);
+    console.error(`[updateSubmission] Error stack:`, error.stack);
+    
+    // Ensure we always send a response
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: {
+          code: 'SERVER_ERROR',
+          message: 'An error occurred while updating the submission'
+        }
+      });
+    }
   }
 };
 

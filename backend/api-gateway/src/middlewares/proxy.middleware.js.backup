@@ -1,12 +1,9 @@
 /**
  * Enhanced proxy middleware for API Gateway
  * Wraps http-proxy-middleware with error handling and logging
- * FIXED: Connection pool management to prevent stale connections
  */
 
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const http = require('http');
-const https = require('https');
 const pathRewriteConfig = require('../config/path-rewrite.config');
 const { handleProxyError, ServiceError } = require('./error.middleware');
 const winston = require('winston');
@@ -26,28 +23,6 @@ const logger = winston.createLogger({
     })
   ]
 });
-
-// CRITICAL FIX: Create HTTP agents with proper connection management
-// These agents disable keep-alive and connection pooling to prevent stale connections
-const createFreshHttpAgent = () => {
-  return new http.Agent({
-    keepAlive: false,           // Disable keep-alive to prevent stale connections
-    maxSockets: 10,            // Limit concurrent connections
-    maxFreeSockets: 0,         // Don't keep free sockets in pool
-    timeout: 5000,             // Socket timeout
-    scheduling: 'fifo'         // First-in-first-out scheduling
-  });
-};
-
-const createFreshHttpsAgent = () => {
-  return new https.Agent({
-    keepAlive: false,           // Disable keep-alive to prevent stale connections
-    maxSockets: 10,            // Limit concurrent connections
-    maxFreeSockets: 0,         // Don't keep free sockets in pool
-    timeout: 5000,             // Socket timeout
-    scheduling: 'fifo'         // First-in-first-out scheduling
-  });
-};
 
 /**
  * Create an enhanced proxy middleware with error handling integration
@@ -91,11 +66,7 @@ const createServiceProxy = (options) => {
   // Log the proxy setup
   logger.info(`Setting up proxy for ${serviceName} at ${serviceUrl} with timeout ${timeout}ms and ${retries} retry attempts`);
 
-  // CRITICAL FIX: Create fresh HTTP agents for each proxy to prevent connection pooling issues
-  const httpAgent = createFreshHttpAgent();
-  const httpsAgent = createFreshHttpsAgent();
-
-  // Create base proxy middleware with proper agent configuration
+  // Create base proxy middleware
   const proxy = createProxyMiddleware({
     target: serviceUrl,
     changeOrigin: true,
@@ -103,33 +74,11 @@ const createServiceProxy = (options) => {
     logLevel: 'silent', // We'll handle our own logging
     timeout,
     proxyTimeout: timeout,
-    // CRITICAL FIX: Configure HTTP agents to prevent stale connections
-    agent: httpAgent,           // Custom HTTP agent for HTTP requests
     // Configure with proper body handling for POST requests
     bodyParser: false,
-    // CRITICAL FIX: Add connection error handling at the agent level
     onError: (err, req, res, target) => {
       // Get current retry count from request object
       req.retryCount = req.retryCount || 0;
-      
-      // For connection errors, create fresh agents to avoid stale connections
-      if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
-        logger.warn(`Connection error with ${serviceName}, will use fresh connection on retry`, {
-          error: err.message,
-          errorCode: err.code,
-          path: req.path,
-          method: req.method,
-          requestId: req.headers['x-request-id'] || 'unknown'
-        });
-        
-        // Destroy the old agent to clear any stale connections
-        if (httpAgent) {
-          httpAgent.destroy();
-        }
-        if (httpsAgent) {
-          httpsAgent.destroy();
-        }
-      }
       
       // Check if we should retry
       if (req.retryCount < retries) {
@@ -144,45 +93,65 @@ const createServiceProxy = (options) => {
           errorCode: err.code
         });
         
-        // For connection errors, create a completely new proxy with fresh agents
-        if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
-          const freshProxy = createProxyMiddleware({
-            target: serviceUrl,
-            changeOrigin: true,
-            pathRewrite,
-            logLevel: 'silent',
-            timeout,
-            proxyTimeout: timeout,
-            agent: createFreshHttpAgent(),
-            bodyParser: false
-          });
-          
-          // Retry with fresh proxy after delay
-          setTimeout(() => {
-            try {
-              freshProxy(req, res);
-            } catch (retryErr) {
-              handleFinalError(retryErr, req, res, serviceName, retries);
-            }
-          }, retryDelay);
-        } else {
-          // For other errors, retry with existing proxy
-          setTimeout(() => {
-            try {
-              proxy(req, res);
-            } catch (retryErr) {
-              handleFinalError(retryErr, req, res, serviceName, retries);
-            }
-          }, retryDelay);
-        }
+        // Retry after delay
+        setTimeout(() => {
+          try {
+            proxy(req, res);
+          } catch (retryErr) {
+            // If retry fails, handle as normal error
+            handleProxyError(retryErr, serviceName);
+          }
+        }, retryDelay);
         
         return;
       }
       
-      // All retries exhausted, handle final error
-      handleFinalError(err, req, res, serviceName, retries);
+      // Convert proxy errors to our standard format after all retries exhausted
+      const error = handleProxyError(err, serviceName);
+      
+      // Log the error
+      logger.error(`Proxy error for ${serviceName} after ${retries} retries: ${err.message}`, {
+        path: req.path,
+        method: req.method,
+        requestId: req.headers['x-request-id'] || 'unknown',
+        userId: req.user ? req.user.id : 'unauthenticated',
+        target,
+        errorCode: err.code
+      });
+      
+      // Enhanced error messages for specific service connection issues
+      let errorMessage = error.message;
+      
+      if (serviceName === 'auth-service' && (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND')) {
+        errorMessage = 'Authentication service is currently unavailable. Please try again in a few moments.';
+        // Additional logging for DNS resolution issues
+        if (err.code === 'ENOTFOUND') {
+          logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
+            serviceName,
+            hostname: err.hostname,
+            requestId: req.headers['x-request-id'] || 'unknown'
+          });
+        }
+      } else if (err.code === 'ENOTFOUND') {
+        errorMessage = `Service ${serviceName} could not be reached. DNS resolution failed for ${err.hostname}.`;
+        logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
+          serviceName,
+          hostname: err.hostname,
+          requestId: req.headers['x-request-id'] || 'unknown'
+        });
+      }
+      
+      // Send standardized response
+      res.status(error.statusCode).json({
+        success: false,
+        error: {
+          code: error.code,
+          message: errorMessage,
+          service: error.serviceId
+        }
+      });
     },
-    onProxyReq: (proxyReq, req, res) => {
+        onProxyReq: (proxyReq, req, res) => {
       // Add request tracking headers
       const requestId = req.headers['x-request-id'] || `req-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
       proxyReq.setHeader('x-request-id', requestId);
@@ -350,53 +319,6 @@ const createServiceProxy = (options) => {
     }
   };
 };
-
-// Helper function to handle final errors after all retries
-function handleFinalError(err, req, res, serviceName, retries) {
-  // Convert proxy errors to our standard format after all retries exhausted
-  const error = handleProxyError(err, serviceName);
-  
-  // Log the error
-  logger.error(`Proxy error for ${serviceName} after ${retries} retries: ${err.message}`, {
-    path: req.path,
-    method: req.method,
-    requestId: req.headers['x-request-id'] || 'unknown',
-    userId: req.user ? req.user.id : 'unauthenticated',
-    errorCode: err.code
-  });
-  
-  // Enhanced error messages for specific service connection issues
-  let errorMessage = error.message;
-  
-  if (serviceName === 'auth-service' && (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND')) {
-    errorMessage = 'Authentication service is currently unavailable. Please try again in a few moments.';
-    // Additional logging for DNS resolution issues
-    if (err.code === 'ENOTFOUND') {
-      logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
-        serviceName,
-        hostname: err.hostname,
-        requestId: req.headers['x-request-id'] || 'unknown'
-      });
-    }
-  } else if (err.code === 'ENOTFOUND') {
-    errorMessage = `Service ${serviceName} could not be reached. DNS resolution failed for ${err.hostname}.`;
-    logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
-      serviceName,
-      hostname: err.hostname,
-      requestId: req.headers['x-request-id'] || 'unknown'
-    });
-  }
-  
-  // Send standardized response
-  res.status(error.statusCode).json({
-    success: false,
-    error: {
-      code: error.code,
-      message: errorMessage,
-      service: error.serviceId
-    }
-  });
-}
 
 module.exports = {
   createServiceProxy

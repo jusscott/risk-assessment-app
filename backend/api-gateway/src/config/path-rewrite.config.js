@@ -6,11 +6,15 @@
 
 const pathRewriteConfig = {
     // Auth service routes - support both forms
-    '^/api/auth/(.*)': '/api/auth/$1',
+    '^/api/auth/(.*)': '/$1',
     
     // Questionnaire service routes - support both singular and plural
     '^/api/questionnaire/(.*)': '/$1',
     '^/api/questionnaires/(.*)': '/$1',
+    
+    // Submission service routes (part of questionnaire service)
+    '^/api/submission/(.*)': '/submissions/$1',
+    '^/api/submissions/(.*)': '/submissions/$1',
     
     // Analysis service routes
     '^/api/analysis/(.*)': '/api/analysis/$1',
@@ -28,6 +32,8 @@ const pathRewriteConfig = {
     '^/api/auth/health': '/health',
     '^/api/questionnaire/health': '/health',
     '^/api/questionnaires/health': '/health',
+    '^/api/submission/health': '/health',
+    '^/api/submissions/health': '/health',
     '^/api/analysis/health': '/health',
     '^/api/report/health': '/health',
     '^/api/reports/health': '/health',
@@ -41,7 +47,7 @@ const generatePathRewrite = (serviceId) => {
     
     switch(serviceId.toLowerCase()) {
         case 'auth':
-            rules['^/api/auth/(.*)'] = '/api/auth/$1';
+            rules['^/api/auth/(.*)'] = '/$1';
             rules['^/api/auth/health'] = '/health';
             break;
             

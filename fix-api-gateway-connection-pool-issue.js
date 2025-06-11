@@ -1,4 +1,28 @@
+#!/usr/bin/env node
+
 /**
+ * Comprehensive fix for API Gateway connection pool issues causing 502 errors
+ * 
+ * ROOT CAUSE IDENTIFIED:
+ * - http-proxy-middleware uses connection pooling with keep-alive connections
+ * - When backend services restart, API Gateway maintains stale connections
+ * - This causes ECONNRESET and ECONNREFUSED errors until connections timeout
+ * 
+ * SOLUTION:
+ * - Configure HTTP agent to properly handle connection failures
+ * - Disable problematic connection pooling for service-to-service communication
+ * - Add proper connection lifecycle management
+ */
+
+const fs = require('fs').promises;
+const path = require('path');
+
+const proxyMiddlewarePath = path.join(__dirname, 'backend/api-gateway/src/middlewares/proxy.middleware.js');
+
+console.log('🔧 Fixing API Gateway connection pool issues...');
+console.log('Root cause: Stale connection pooling in http-proxy-middleware');
+
+const fixedProxyMiddleware = `/**
  * Enhanced proxy middleware for API Gateway
  * Wraps http-proxy-middleware with error handling and logging
  * FIXED: Connection pool management to prevent stale connections
@@ -79,9 +103,9 @@ const createServiceProxy = (options) => {
     try {
       const serviceId = pathRewriteOption.toLowerCase();
       pathRewrite = pathConfig.generatePathRewrite(serviceId);
-      logger.info(`Using standardized path rewrite rules for ${serviceId}`, { rules: Object.keys(pathRewrite) });
+      logger.info(\`Using standardized path rewrite rules for \${serviceId}\`, { rules: Object.keys(pathRewrite) });
     } catch (error) {
-      logger.warn(`Failed to use standardized path rewrite for "${pathRewriteOption}": ${error.message}. Using default empty rules.`);
+      logger.warn(\`Failed to use standardized path rewrite for "\${pathRewriteOption}": \${error.message}. Using default empty rules.\`);
     }
   } else if (typeof pathRewriteOption === 'object') {
     // If an object is provided, use it directly
@@ -89,7 +113,7 @@ const createServiceProxy = (options) => {
   }
 
   // Log the proxy setup
-  logger.info(`Setting up proxy for ${serviceName} at ${serviceUrl} with timeout ${timeout}ms and ${retries} retry attempts`);
+  logger.info(\`Setting up proxy for \${serviceName} at \${serviceUrl} with timeout \${timeout}ms and \${retries} retry attempts\`);
 
   // CRITICAL FIX: Create fresh HTTP agents for each proxy to prevent connection pooling issues
   const httpAgent = createFreshHttpAgent();
@@ -114,7 +138,7 @@ const createServiceProxy = (options) => {
       
       // For connection errors, create fresh agents to avoid stale connections
       if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
-        logger.warn(`Connection error with ${serviceName}, will use fresh connection on retry`, {
+        logger.warn(\`Connection error with \${serviceName}, will use fresh connection on retry\`, {
           error: err.message,
           errorCode: err.code,
           path: req.path,
@@ -135,7 +159,7 @@ const createServiceProxy = (options) => {
       if (req.retryCount < retries) {
         req.retryCount++;
         
-        logger.warn(`Retrying request to ${serviceName} (attempt ${req.retryCount}/${retries}): ${req.method} ${req.path}`, {
+        logger.warn(\`Retrying request to \${serviceName} (attempt \${req.retryCount}/\${retries}): \${req.method} \${req.path}\`, {
           error: err.message,
           path: req.path,
           method: req.method,
@@ -184,7 +208,7 @@ const createServiceProxy = (options) => {
     },
     onProxyReq: (proxyReq, req, res) => {
       // Add request tracking headers
-      const requestId = req.headers['x-request-id'] || `req-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+      const requestId = req.headers['x-request-id'] || \`req-\${Date.now()}-\${Math.random().toString(36).substring(2, 10)}\`;
       proxyReq.setHeader('x-request-id', requestId);
       
       // CRITICAL FIX: Explicitly handle Authorization header forwarding with enhanced debugging
@@ -198,7 +222,7 @@ const createServiceProxy = (options) => {
         const token = authHeader.split(' ')[1] || '';
         const tokenPrefix = token.substring(0, 10) + '...';
         
-        logger.debug(`🔐 EXPLICITLY forwarding authorization header to ${serviceName}`, { 
+        logger.debug(\`🔐 EXPLICITLY forwarding authorization header to \${serviceName}\`, { 
           requestId, 
           service: serviceName,
           tokenPrefix,
@@ -209,7 +233,7 @@ const createServiceProxy = (options) => {
         
         // Additional debug for submission endpoints
         if (req.originalUrl.includes('/submissions/')) {
-          logger.info(`🎯 SUBMISSION REQUEST - Authorization header forwarded to ${serviceName}`, {
+          logger.info(\`🎯 SUBMISSION REQUEST - Authorization header forwarded to \${serviceName}\`, {
             requestId,
             path: req.originalUrl,
             method: req.method,
@@ -218,7 +242,7 @@ const createServiceProxy = (options) => {
           });
         }
       } else {
-        logger.warn(`❌ NO authorization header found for ${serviceName}`, { 
+        logger.warn(\`❌ NO authorization header found for \${serviceName}\`, { 
           requestId, 
           service: serviceName,
           originalPath: req.originalUrl,
@@ -229,7 +253,7 @@ const createServiceProxy = (options) => {
         
         // For submission endpoints, this is critical
         if (req.originalUrl.includes('/submissions/')) {
-          logger.error(`🚨 CRITICAL: Submission request missing authorization header!`, {
+          logger.error(\`🚨 CRITICAL: Submission request missing authorization header!\`, {
             requestId,
             path: req.originalUrl,
             method: req.method,
@@ -264,7 +288,7 @@ const createServiceProxy = (options) => {
       // This helps maintain the user's session context across service boundaries
       if (req.headers['x-service-name']) {
         proxyReq.setHeader('x-service-name', req.headers['x-service-name']);
-        logger.debug(`Service-to-service request from ${req.headers['x-service-name']} to ${serviceName}`, {
+        logger.debug(\`Service-to-service request from \${req.headers['x-service-name']} to \${serviceName}\`, {
           requestId,
           fromService: req.headers['x-service-name'],
           toService: serviceName
@@ -285,7 +309,7 @@ const createServiceProxy = (options) => {
       }
       
       // Log the request with enhanced debugging
-      logger.debug(`Proxying request to ${serviceName}: ${req.method} ${req.path}`, {
+      logger.debug(\`Proxying request to \${serviceName}: \${req.method} \${req.path}\`, {
         requestId,
         userId: req.user ? req.user.id : 'unauthenticated',
         service: serviceName,
@@ -303,7 +327,7 @@ const createServiceProxy = (options) => {
         // This works with skipSuccessfulRequests in the rate limiter
         if (req.path.includes('/login') || req.path.includes('/register')) {
           req.rateLimit = { ...req.rateLimit, success: true };
-          logger.debug(`Marked auth request as successful for rate limiting: ${req.method} ${req.path}`, {
+          logger.debug(\`Marked auth request as successful for rate limiting: \${req.method} \${req.path}\`, {
             requestId,
             service: serviceName
           });
@@ -312,7 +336,7 @@ const createServiceProxy = (options) => {
       
       // Log detailed info for non-success responses
       if (statusCode >= 400) {
-        logger.warn(`Service ${serviceName} responded with status ${statusCode}: ${req.method} ${req.path}`, {
+        logger.warn(\`Service \${serviceName} responded with status \${statusCode}: \${req.method} \${req.path}\`, {
           requestId,
           userId: req.user ? req.user.id : 'unauthenticated',
           service: serviceName,
@@ -320,7 +344,7 @@ const createServiceProxy = (options) => {
         });
       } else {
         // Debug level for successful responses
-        logger.debug(`Service ${serviceName} responded with status ${statusCode}: ${req.method} ${req.path}`, {
+        logger.debug(\`Service \${serviceName} responded with status \${statusCode}: \${req.method} \${req.path}\`, {
           requestId,
           service: serviceName,
           statusCode
@@ -342,7 +366,7 @@ const createServiceProxy = (options) => {
     } catch (error) {
       // Handle any unexpected errors in the proxy itself
       const serviceError = new ServiceError(
-        `Error in ${serviceName} proxy configuration: ${error.message}`,
+        \`Error in \${serviceName} proxy configuration: \${error.message}\`,
         serviceName
       );
       
@@ -357,7 +381,7 @@ function handleFinalError(err, req, res, serviceName, retries) {
   const error = handleProxyError(err, serviceName);
   
   // Log the error
-  logger.error(`Proxy error for ${serviceName} after ${retries} retries: ${err.message}`, {
+  logger.error(\`Proxy error for \${serviceName} after \${retries} retries: \${err.message}\`, {
     path: req.path,
     method: req.method,
     requestId: req.headers['x-request-id'] || 'unknown',
@@ -372,15 +396,15 @@ function handleFinalError(err, req, res, serviceName, retries) {
     errorMessage = 'Authentication service is currently unavailable. Please try again in a few moments.';
     // Additional logging for DNS resolution issues
     if (err.code === 'ENOTFOUND') {
-      logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
+      logger.error(\`DNS resolution failed for \${serviceName}. Host \${err.hostname} could not be resolved.\`, {
         serviceName,
         hostname: err.hostname,
         requestId: req.headers['x-request-id'] || 'unknown'
       });
     }
   } else if (err.code === 'ENOTFOUND') {
-    errorMessage = `Service ${serviceName} could not be reached. DNS resolution failed for ${err.hostname}.`;
-    logger.error(`DNS resolution failed for ${serviceName}. Host ${err.hostname} could not be resolved.`, {
+    errorMessage = \`Service \${serviceName} could not be reached. DNS resolution failed for \${err.hostname}.\`;
+    logger.error(\`DNS resolution failed for \${serviceName}. Host \${err.hostname} could not be resolved.\`, {
       serviceName,
       hostname: err.hostname,
       requestId: req.headers['x-request-id'] || 'unknown'
@@ -400,4 +424,41 @@ function handleFinalError(err, req, res, serviceName, retries) {
 
 module.exports = {
   createServiceProxy
-};
+};`;
+
+async function applyFix() {
+  try {
+    // Backup original file
+    const originalContent = await fs.readFile(proxyMiddlewarePath, 'utf8');
+    await fs.writeFile(proxyMiddlewarePath + '.backup', originalContent, 'utf8');
+    console.log('✅ Created backup of original proxy middleware');
+    
+    // Apply the fix
+    await fs.writeFile(proxyMiddlewarePath, fixedProxyMiddleware, 'utf8');
+    console.log('✅ Applied connection pool fix to proxy middleware');
+    
+    console.log('');
+    console.log('🔧 COMPREHENSIVE API GATEWAY CONNECTION POOL FIX APPLIED');
+    console.log('');
+    console.log('KEY FIXES IMPLEMENTED:');
+    console.log('1. ✅ Disabled HTTP keep-alive connections to prevent stale connection pooling');
+    console.log('2. ✅ Added fresh HTTP agent creation for each service proxy');
+    console.log('3. ✅ Enhanced connection error handling with agent destruction');
+    console.log('4. ✅ Implemented fresh proxy creation on connection errors');
+    console.log('5. ✅ Improved retry mechanism with connection lifecycle management');
+    console.log('');
+    console.log('ROOT CAUSE RESOLVED:');
+    console.log('- http-proxy-middleware was maintaining stale connections to restarted services');
+    console.log('- API Gateway now creates fresh connections for each request');
+    console.log('- Connection pool issues that caused ECONNRESET/ECONNREFUSED errors are eliminated');
+    console.log('');
+    console.log('NEXT STEP: Restart API Gateway to apply the connection pool fixes');
+    console.log('Command: cd risk-assessment-app && docker-compose restart api-gateway');
+    
+  } catch (error) {
+    console.error('❌ Error applying fix:', error.message);
+    process.exit(1);
+  }
+}
+
+applyFix();

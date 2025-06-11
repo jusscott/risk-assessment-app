@@ -8,7 +8,7 @@ const router = Router();
 // Authentication routes
 router.post('/login', login);
 router.post('/register', register);
-router.post('/logout', authenticateJWT, logout);
+router.post('/logout', logout);
 
 // Token refresh endpoint
 router.post('/refresh-token', refreshToken);

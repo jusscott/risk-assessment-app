@@ -130,8 +130,6 @@ services:
       context: ./backend/questionnaire-service
       dockerfile: Dockerfile
     container_name: questionnaire-service
-    mem_limit: 512m
-    memswap_limit: 512m
     ports:
       - '5002:5002'
     volumes:

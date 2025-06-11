@@ -94,20 +94,31 @@ const cleanupStalePendingValidations = () => {
  * @returns {void}
  */
 const authenticate = async (req, res, next) => {
-  // Extract token first - we'll keep the real token if available
-  const token = tokenUtil.extractTokenFromRequest(req);
-  
-  // Generate a unique request ID for debugging
+  // Generate a unique request ID for debugging first
   const requestId = req.headers['x-request-id'] || `req-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
   
-  // Force bypass auth in development/test environment ONLY if no token is provided
-  if (!token && (process.env.NODE_ENV !== 'production' || config.bypassAuth === true || (process.env.BYPASS_AUTH === 'true'))) {
-    console.warn(`[${requestId}] ⚠️ BYPASSING AUTHENTICATION - FOR DEVELOPMENT USE ONLY ⚠️`);
-    req.user = { id: 'dev-user', email: 'dev@example.com', role: 'ADMIN' };
-    return next();
-  }
-
+  console.log(`[${requestId}] [AUTH] Starting authentication middleware for ${req.method} ${req.path}`);
+  
   try {
+    // Extract token with error handling
+    let token;
+    try {
+      token = tokenUtil.extractTokenFromRequest(req);
+      console.log(`[${requestId}] [AUTH] Token extraction ${token ? 'successful' : 'failed'}`);
+    } catch (tokenExtractionError) {
+      console.error(`[${requestId}] [AUTH] Error extracting token:`, tokenExtractionError);
+      token = null;
+    }
+    
+    // Force bypass auth in development/test environment ONLY if no token is provided
+    if (!token && (process.env.NODE_ENV !== 'production' || config.bypassAuth === true || (process.env.BYPASS_AUTH === 'true'))) {
+      console.warn(`[${requestId}] [AUTH] ⚠️ BYPASSING AUTHENTICATION - FOR DEVELOPMENT USE ONLY ⚠️`);
+      req.user = { id: 'dev-user', email: 'dev@example.com', role: 'ADMIN' };
+      console.log(`[${requestId}] [AUTH] Successfully bypassed auth, proceeding to next middleware`);
+      return next();
+    }
+
+    console.log(`[${requestId}] [AUTH] Proceeding with full authentication flow`);
     // Check for diagnostic endpoints that should bypass normal auth
     const isDiagnosticPath = req.path.includes('/diagnostic');
     if (isDiagnosticPath && process.env.NODE_ENV !== 'production') {
@@ -237,22 +248,37 @@ const authenticate = async (req, res, next) => {
       return performLocalValidation(token, req, res, next, requestId);
     }
   } catch (error) {
-    console.error(`[${requestId}] Unexpected token validation error:`, error.message);
+    console.error(`[${requestId}] [AUTH] CRITICAL ERROR in authentication middleware:`, error);
+    console.error(`[${requestId}] [AUTH] Error stack:`, error.stack);
     
-    // For development environments, allow bypass authentication for testing
-    if (process.env.NODE_ENV === 'development' && process.env.BYPASS_AUTH === 'true') {
-      console.warn(`[${requestId}] ⚠️ BYPASSING AUTHENTICATION - FOR DEVELOPMENT USE ONLY ⚠️`);
-      req.user = { id: 'dev-user', email: 'dev@example.com', role: 'USER' };
-      return next();
+    // Ensure we never crash the service by always sending a response
+    try {
+      // For development environments, allow bypass authentication for testing
+      if (process.env.NODE_ENV === 'development' && process.env.BYPASS_AUTH === 'true') {
+        console.warn(`[${requestId}] [AUTH] ⚠️ BYPASSING AUTHENTICATION DUE TO ERROR - FOR DEVELOPMENT USE ONLY ⚠️`);
+        req.user = { id: 'dev-user', email: 'dev@example.com', role: 'USER' };
+        return next();
+      }
+      
+      // Ensure we don't send multiple responses
+      if (!res.headersSent) {
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'AUTH_ERROR',
+            message: 'Failed to authenticate user',
+          },
+        });
+      } else {
+        console.error(`[${requestId}] [AUTH] Headers already sent, cannot send error response`);
+      }
+    } catch (responseError) {
+      console.error(`[${requestId}] [AUTH] DOUBLE FAULT - Error while handling auth error:`, responseError);
+      // Last resort: try to call next with error to prevent hanging
+      if (typeof next === 'function') {
+        return next(error);
+      }
     }
-    
-    return res.status(401).json({
-      success: false,
-      error: {
-        code: 'AUTH_ERROR',
-        message: 'Failed to authenticate user',
-      },
-    });
   }
 };
 

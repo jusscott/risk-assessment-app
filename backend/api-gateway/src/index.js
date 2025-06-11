@@ -166,7 +166,7 @@ const reportServiceProxy = createServiceProxy({
 
 // API routes with rate limiting and caching
 // FIXED: Added rate limit logging
-app.use('/api/auth', logRateLimitInfo, authLimiter, authRoutes); // Use auth routes with validation
+app.use('/api/auth', logRateLimitInfo, authLimiter, authServiceProxy); // Direct auth service proxy
 
 // Special handling for diagnostic endpoints - needs to be registered BEFORE other questionnaire routes
 // No auth check for diagnostics to allow proper health monitoring
@@ -210,6 +210,22 @@ app.use('/api/questionnaire/submissions',
 );
 // Enhanced questionnaire submissions route with auth header preservation
 app.use('/api/questionnaires/submissions', 
+  preserveAuthHeader,           // Store original auth header FIRST
+  checkSessionInactivity, 
+  verifyToken, 
+  apiLimiter, 
+  createPreservingProxy(questionnaireServiceProxy)  // Restore auth header before forwarding
+);
+
+// Direct submissions routes (for backward compatibility and cleaner API)
+app.use('/api/submission', 
+  preserveAuthHeader,           // Store original auth header FIRST
+  checkSessionInactivity, 
+  verifyToken, 
+  apiLimiter, 
+  createPreservingProxy(questionnaireServiceProxy)  // Restore auth header before forwarding
+);
+app.use('/api/submissions', 
   preserveAuthHeader,           // Store original auth header FIRST
   checkSessionInactivity, 
   verifyToken, 

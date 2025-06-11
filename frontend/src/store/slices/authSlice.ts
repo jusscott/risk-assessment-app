@@ -44,18 +44,57 @@ export const login = createAsyncThunk(
       console.log('🔐 Auth slice login thunk started');
       const response = await authService.login(credentials);
       
+      // Type assertion to handle the double-wrapped response
+      const responseData = response.data as any;
+      
       console.log('✅ Login service response received:', {
-        hasTokens: !!response.data.tokens,
-        hasAccessToken: !!response.data.tokens?.accessToken,
-        hasRefreshToken: !!response.data.tokens?.refreshToken,
-        accessTokenLength: response.data.tokens?.accessToken?.length || 0
+        responseStructure: Object.keys(responseData || {}),
+        hasDirectTokens: !!responseData.tokens,
+        hasNestedData: !!responseData.data,
+        nestedDataKeys: responseData.data ? Object.keys(responseData.data) : [],
+        hasNestedTokens: !!responseData.data?.tokens,
+        hasNestedUser: !!responseData.data?.user
+      });
+      
+      // Handle double-wrapped response structure:
+      // API Gateway wraps: { success: true, data: AuthResponse }
+      // But AuthResponse is also wrapped: { success: true, data: { user, tokens } }
+      // So we get: { success: true, data: { success: true, data: { user, tokens } } }
+      
+      let tokens: { accessToken: string; refreshToken: string; expiresIn: number };
+      let user: AuthResponse['user'];
+      
+      if (responseData.data?.tokens && responseData.data?.user) {
+        // Double-wrapped case (current backend behavior)
+        tokens = responseData.data.tokens;
+        user = responseData.data.user;
+        console.log('🔍 Using double-wrapped response structure');
+      } else if (responseData.tokens && responseData.user) {
+        // Direct case (expected behavior)
+        tokens = responseData.tokens;
+        user = responseData.user;
+        console.log('🔍 Using direct response structure');
+      } else {
+        console.error('❌ Unexpected response structure:', responseData);
+        throw new Error('Invalid login response structure');
+      }
+      
+      if (!tokens || !tokens.accessToken) {
+        throw new Error('No tokens received from login response');
+      }
+      
+      console.log('✅ Tokens found at:', {
+        location: response.data.tokens ? 'response.data.tokens' : 'response.data.data.tokens',
+        hasAccessToken: !!tokens.accessToken,
+        hasRefreshToken: !!tokens.refreshToken,
+        accessTokenLength: tokens.accessToken?.length || 0
       });
       
       // Store the tokens in localStorage
       console.log('📝 Calling authService.setToken from auth slice...');
       authService.setToken(
-        response.data.tokens.accessToken, 
-        response.data.tokens.refreshToken
+        tokens.accessToken, 
+        tokens.refreshToken
       );
       
       // Verify tokens were stored
@@ -64,7 +103,7 @@ export const login = createAsyncThunk(
         console.log('🔍 Token verification from auth slice:', {
           tokenStoredSuccessfully: !!verifyToken,
           tokenLength: verifyToken?.length || 0,
-          tokensMatch: verifyToken === response.data.tokens.accessToken
+          tokensMatch: verifyToken === tokens.accessToken
         });
       }, 50); // Allow time for storage to complete
       
@@ -73,8 +112,8 @@ export const login = createAsyncThunk(
       
       // Format the response to match our state structure
       return {
-        user: response.data.user,
-        token: response.data.tokens.accessToken
+        user: user,
+        token: tokens.accessToken
       };
     } catch (error: any) {
       console.error('Login error in Redux slice:', error);

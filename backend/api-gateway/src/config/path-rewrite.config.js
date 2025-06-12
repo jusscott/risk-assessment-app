@@ -17,7 +17,7 @@ const pathRewriteConfig = {
     '^/api/submissions/(.*)': '/submissions/$1',
     
     // Analysis service routes
-    '^/api/analysis/(.*)': '/api/analysis/$1',
+    '^/api/analysis/(.*)': '/api/$1',
     
     // Report service routes - support both singular and plural
     '^/api/report/(.*)': '/api/reports/$1',
@@ -34,7 +34,7 @@ const pathRewriteConfig = {
     '^/api/questionnaires/health': '/health',
     '^/api/submission/health': '/health',
     '^/api/submissions/health': '/health',
-    '^/api/analysis/health': '/health',
+    '^/api/analysis/health': '/api/health',
     '^/api/report/health': '/health',
     '^/api/reports/health': '/health',
     '^/api/payment/health': '/health',
@@ -67,8 +67,8 @@ const generatePathRewrite = (serviceId) => {
             break;
             
         case 'analysis':
-            rules['^/api/analysis/(.*)'] = '/api/analysis/$1';
-            rules['^/api/analysis/health'] = '/health';
+            rules['^/api/analysis/(.*)'] = '/api/$1';
+            rules['^/api/analysis/health'] = '/api/health';
             break;
             
         case 'report':

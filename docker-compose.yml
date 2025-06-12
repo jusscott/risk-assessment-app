@@ -213,6 +213,7 @@ services:
       - DATABASE_URL=postgresql://postgres:password@analysis-db:5432/analysis
       - AUTH_SERVICE_URL=http://auth-service:5001/api
       - QUESTIONNAIRE_SERVICE_URL=http://questionnaire-service:5002/api
+      - REPORT_SERVICE_URL=http://report-service:5005
       - PORT=5004
     depends_on:
       - analysis-db

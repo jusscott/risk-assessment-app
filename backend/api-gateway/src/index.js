@@ -67,7 +67,7 @@ app.use('/api/payment/health', healthLimiter, healthRoutes);
 app.use('/api/payments/health', healthLimiter, healthRoutes);
 
 // Analysis service health endpoints
-app.use('/api/analysis/health', healthLimiter, healthRoutes);
+// Analysis service health handled by proxy below
 
 // Report service health endpoints (both singular and plural)
 app.use('/api/report/health', healthLimiter, healthRoutes);
@@ -81,7 +81,7 @@ const serviceUrls = {
   auth: getServiceUrl('AUTH', 'http://auth-service:5001'),
   questionnaire: getServiceUrl('QUESTIONNAIRE', 'http://questionnaire-service:5002'),
   payment: getServiceUrl('PAYMENT', 'http://payment-service:5003/api'),
-  analysis: getServiceUrl('ANALYSIS', 'http://analysis-service:5004/api'),
+  analysis: getServiceUrl('ANALYSIS', 'http://analysis-service:5004'),
   report: getServiceUrl('REPORT', 'http://report-service:5005/api'),
   plans: serviceUrlConfig.plans || 'http://localhost:5055/api'
 };

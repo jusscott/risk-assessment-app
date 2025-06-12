@@ -38,7 +38,6 @@ const config = {
     reportService: {
       host: process.env.REPORT_SERVICE_HOST || 'report-service',
       port: process.env.REPORT_SERVICE_PORT || '5005',
-      wsUrl: process.env.REPORT_SERVICE_WS_URL || 'ws://report-service:5005/ws',
       httpUrl: process.env.REPORT_SERVICE_URL || 'http://report-service:5005'
     }
   },
@@ -86,29 +85,6 @@ const config = {
     circuitBreakerResetTimeout: process.env.CIRCUIT_BREAKER_RESET_TIMEOUT || 30000
   },
   
-  // WebSocket connection configuration
-  sockets: {
-    // Enable debug logging for socket connections
-    debugSocket: process.env.DEBUG_SOCKET === 'true' || false,
-    
-    // Keep-alive interval in milliseconds
-    keepAliveInterval: parseInt(process.env.WS_KEEP_ALIVE_INTERVAL || '30000', 10),
-    
-    // Reconnect interval in milliseconds
-    reconnectInterval: parseInt(process.env.WS_RECONNECT_INTERVAL || '5000', 10),
-    
-    // Ping timeout in milliseconds
-    pingTimeout: parseInt(process.env.WS_PING_TIMEOUT || '5000', 10),
-    
-    // Maximum reconnect delay in milliseconds
-    maxReconnectDelay: parseInt(process.env.WS_MAX_RECONNECT_DELAY || '60000', 10),
-    
-    // Buffer threshold before throttling
-    bufferThreshold: parseInt(process.env.WS_BUFFER_THRESHOLD || '100', 10),
-    
-    // High priority buffer size
-    highPriorityBufferSize: parseInt(process.env.WS_HIGH_PRIORITY_BUFFER_SIZE || '50', 10)
-  }
-};
+  };
 
 module.exports = config;

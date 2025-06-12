@@ -8,7 +8,6 @@ const healthRoutes = require('./routes/health.routes');
 const benchmarkRoutes = require('./routes/benchmark.routes');
 const rulesRoutes = require('./routes/rules.routes');
 const webhookRoutes = require('./routes/webhook.routes');
-const { initSocketTimeoutFix, shutdownSocketTimeoutFix } = require('./utils/socket-timeout-fix');
 const { initReportServiceConnection } = require('./utils/webhook-socket-integration');
 
 // Create Express app
@@ -74,38 +73,24 @@ const server = app.listen(port, () => {
   logger.info(`Analysis service listening on port ${port}`);
   logger.info(`Environment: ${config.nodeEnv}`);
   
-  // Initialize socket timeout fix
-  initSocketTimeoutFix();
-  logger.info('WebSocket timeout handling initialized');
-  
-  // Initialize report service connection
+  // Initialize HTTP-based report service communication
   initReportServiceConnection();
-  logger.info('Report service WebSocket connection initialized');
+  logger.info('HTTP-based report service communication initialized');
   
-  // WebSocket Recovery Logic
+  // Report service health monitoring (HTTP-based)
   const serviceHealthMonitor = {
     reportServiceHealthy: false,
     
     async checkReportServiceHealth() {
       try {
-        const response = await fetch(`${process.env.REPORT_SERVICE_URL || 'http://report-service:3005'}/health`);
-        this.reportServiceHealthy = response.ok;
+        const axios = require('axios');
+        const response = await axios.get(`${config.services.reportService.httpUrl}/health`, { timeout: 5000 });
+        this.reportServiceHealthy = response.status === 200;
         return this.reportServiceHealthy;
       } catch (error) {
-        logger.warn('Report service health check failed:', error.message);
+        logger.debug(`Report service health check: ${error.message}`);
         this.reportServiceHealthy = false;
         return false;
-      }
-    },
-
-    async recoverWebSocketConnections() {
-      if (this.reportServiceHealthy && global.io) {
-        logger.info('🔄 Recovering WebSocket connections...');
-        global.io.emit('service-recovery', {
-          service: 'report-service',
-          status: 'healthy',
-          timestamp: new Date().toISOString()
-        });
       }
     },
 
@@ -115,25 +100,22 @@ const server = app.listen(port, () => {
         const isHealthy = await this.checkReportServiceHealth();
         
         if (!wasHealthy && isHealthy) {
-          logger.info('✅ Report service recovered, triggering WebSocket recovery');
-          await this.recoverWebSocketConnections();
+          logger.info('✅ Report service recovered and available via HTTP');
+        } else if (wasHealthy && !isHealthy) {
+          logger.warn('⚠️  Report service health check failed');
         }
-      }, 10000); // Check every 10 seconds
+      }, 30000); // Check every 30 seconds (less frequent than before)
     }
   };
 
   // Start monitoring after server setup
   serviceHealthMonitor.startMonitoring();
-  logger.info('WebSocket recovery monitoring started');
+  logger.info('HTTP-based service health monitoring started');
 });
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM signal received: closing HTTP server');
-  
-  // Shutdown socket timeout fix components
-  shutdownSocketTimeoutFix();
-  logger.info('WebSocket timeout handling shutdown');
   
   // Close database connection
   await prisma.$disconnect();
@@ -147,10 +129,6 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT signal received: closing HTTP server');
-  
-  // Shutdown socket timeout fix components
-  shutdownSocketTimeoutFix();
-  logger.info('WebSocket timeout handling shutdown');
   
   // Close database connection
   await prisma.$disconnect();

@@ -1,16 +1,11 @@
 /**
- * WebSocket Timeout Fix - Analysis Service Integration
+ * HTTP-Only Report Service Integration - Analysis Service
  * 
- * Integrates the generic WebSocket timeout fix with Analysis Service-specific
- * functions for handling analysis tasks and report service notifications.
+ * Provides HTTP-based communication with the report service instead of WebSocket.
+ * This fixes the 404 errors caused by trying to connect to non-existent WebSocket endpoints.
  */
 
-const { 
-  createConnection, 
-  sendMessage, 
-  closeConnection,
-  getStatus
-} = require('./socket-timeout-fix');
+const axios = require('axios');
 const analysisService = require('../services/analysis.service');
 const config = require('../config/config');
 const winston = require('winston');
@@ -33,41 +28,42 @@ const logger = winston.createLogger({
 const analysisQueue = [];
 let isProcessingQueue = false;
 
-// Report service WebSocket connection
-const REPORT_SERVICE_CONN_ID = 'report-service';
-let reportServiceConnected = false;
+// Report service HTTP client configuration
+const reportServiceClient = axios.create({
+  baseURL: config.services.reportService.httpUrl || 'http://report-service:5005',
+  timeout: config.connection.httpTimeout || 30000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 /**
- * Initialize connection to report service
+ * Initialize HTTP-based report service communication
+ * This replaces the WebSocket connection that was causing 404 errors
  */
 function initReportServiceConnection() {
-  const reportServiceUrl = config.services.reportService.wsUrl || 
-    `ws://${config.services.reportService.host}:${config.services.reportService.port}/ws`;
+  logger.info('Initialized HTTP-based report service communication');
+  logger.info(`Report service URL: ${reportServiceClient.defaults.baseURL}`);
+  
+  // Test connectivity to report service
+  testReportServiceConnectivity();
+}
 
-  // Create connection with automatic reconnect
-  createConnection(REPORT_SERVICE_CONN_ID, reportServiceUrl, {
-    onOpen: () => {
-      logger.info('Connected to report service WebSocket');
-      reportServiceConnected = true;
-    },
-    onClose: () => {
-      logger.info('Disconnected from report service WebSocket');
-      reportServiceConnected = false;
-    },
-    onError: (error) => {
-      logger.error(`Report service WebSocket error: ${error.message}`);
-      reportServiceConnected = false;
-    },
-    onMessage: (data) => {
-      logger.debug('Received message from report service:', data);
-      // Handle any responses from report service if needed
-    }
-  });
+/**
+ * Test connectivity to report service
+ */
+async function testReportServiceConnectivity() {
+  try {
+    const response = await reportServiceClient.get('/health');
+    logger.info('✅ Report service HTTP connectivity verified');
+  } catch (error) {
+    logger.warn(`⚠️  Report service connectivity test failed: ${error.message}`);
+  }
 }
 
 /**
  * Queue an analysis task for processing
- * This prevents WebSocket timeouts during heavy processing
+ * This prevents timeout issues during heavy processing
  * 
  * @param {string} submissionId - Questionnaire submission ID
  * @param {string} userId - User ID
@@ -152,59 +148,50 @@ async function processAnalysisQueue() {
 }
 
 /**
- * Notify report service about completed analysis with timeout protection
+ * Notify report service about completed analysis using HTTP instead of WebSocket
+ * This fixes the 404 WebSocket errors
  * 
  * @param {string} analysisId - Analysis ID
  * @param {string} userId - User ID
- * @returns {Promise<void>}
+ * @returns {Promise<Object>} - Notification result
  */
 async function notifyReportServiceWithTimeout(analysisId, userId) {
-  // Ensure connection to report service
-  if (!reportServiceConnected) {
-    initReportServiceConnection();
-    
-    // Wait for connection to establish
-    await new Promise(resolve => {
-      const checkInterval = setInterval(() => {
-        if (reportServiceConnected) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 1000);
-      
-      // Timeout after 10 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        if (!reportServiceConnected) {
-          logger.warn('Timed out waiting for report service connection');
-          resolve();
-        }
-      }, 10000);
-    });
-  }
+  logger.info(`Notifying report service about completed analysis ${analysisId} via HTTP`);
   
-  // Send the notification with high priority
-  logger.info(`Notifying report service about completed analysis ${analysisId}`);
-  
-  const message = {
+  const notification = {
     type: 'analysis_complete',
     analysisId,
     userId,
     timestamp: Date.now()
   };
   
-  // Use the WebSocket timeout fix to send the message with high priority
-  sendMessage(REPORT_SERVICE_CONN_ID, message, { priority: 'high' });
-  
-  // Log connection status
-  const status = getStatus(REPORT_SERVICE_CONN_ID);
-  logger.debug(`Report service connection status:`, status);
-  
-  return { success: true };
+  try {
+    // Use HTTP POST instead of WebSocket message
+    const response = await reportServiceClient.post('/api/reports/notifications', notification);
+    
+    logger.info(`✅ Successfully notified report service via HTTP: ${response.status}`);
+    return { success: true, status: response.status };
+    
+  } catch (error) {
+    // Handle different types of errors gracefully
+    if (error.response) {
+      // HTTP error response (404, 500, etc.)
+      logger.warn(`Report service notification failed with HTTP ${error.response.status}: ${error.response.statusText}`);
+      return { success: false, error: `HTTP ${error.response.status}`, details: error.response.statusText };
+    } else if (error.code === 'ECONNREFUSED') {
+      // Service unavailable
+      logger.warn('Report service is currently unavailable for notifications');
+      return { success: false, error: 'SERVICE_UNAVAILABLE', details: 'Report service connection refused' };
+    } else {
+      // Other network/timeout errors
+      logger.warn(`Report service notification failed: ${error.message}`);
+      return { success: false, error: 'NETWORK_ERROR', details: error.message };
+    }
+  }
 }
 
 /**
- * Get the status of the analysis queue and WebSocket connections
+ * Get the status of the analysis queue and HTTP connectivity
  * 
  * @returns {Object} Status information
  */
@@ -212,8 +199,9 @@ function getQueueStatus() {
   return {
     queueSize: analysisQueue.length,
     isProcessing: isProcessingQueue,
-    reportServiceConnected,
-    webSocketStatus: getStatus()
+    reportServiceUrl: reportServiceClient.defaults.baseURL,
+    connectionType: 'HTTP',
+    lastConnectivityCheck: new Date().toISOString()
   };
 }
 
